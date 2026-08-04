@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get early access · Rally</title>
+<meta name="description" content="Join the Rally early access list. For youth aged 15 to 25 in the Greater Toronto Area, and for the organizations that host them.">
+<meta name="theme-color" content="#faf7f0">
+<meta name="robots" content="index, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/form.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%2314532d'/><path d='M7.6 4.4v15.2' stroke='%23faf7f0' stroke-width='2' stroke-linecap='round'/><path d='M7.6 5.6h9.6l-2.6 3.4 2.6 3.4H7.6z' fill='%23faf7f0'/></svg>">
+</head>
+<body>
+
+<a class="skip-link" href="#form">Skip to the form</a>
+
+<header class="doc-head">
+  <a class="wordmark" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7.6 4.4v15.2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+      <path d="M7.6 5.6h10l-2.7 3.5 2.7 3.5h-10z" fill="currentColor"/>
+    </svg>
+    Rally
+  </a>
+  <a class="btn btn--ghost" href="index.html">Back to site</a>
+</header>
+
+<main class="form-page">
+
+  <div class="form-page__intro">
+    <p class="eyebrow">Early access</p>
+    <h1>Tell Us Who<br>You Are</h1>
+    <p class="lede">Rally opens in the Greater Toronto Area first. Leave your details and we will get in touch when it reaches your area, or sooner if we are looking for people to test with.</p>
+
+    <ol class="next-steps">
+      <li>You send this form. It takes about a minute.</li>
+      <li>We read it. A person, not an autoresponder.</li>
+      <li>We email you when Rally opens near you, and nothing else. No newsletter.</li>
+    </ol>
+  </div>
+
+  <div class="form-card" id="form">
+
+    <form id="earlyAccess" novalidate>
+
+      <div class="field" data-field>
+        <label for="name">Your name <span class="req" aria-hidden="true">*</span></label>
+        <input type="text" id="name" name="name" autocomplete="name" required
+               data-error="Please tell us what to call you.">
+        <p class="field-error" id="name-error" role="alert"></p>
+      </div>
+
+      <div class="field" data-field>
+        <label for="email">Email <span class="req" aria-hidden="true">*</span></label>
+        <input type="email" id="email" name="email" autocomplete="email" required
+               inputmode="email" data-error="That email does not look right. Check it over?">
+        <p class="field-error" id="email-error" role="alert"></p>
+      </div>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset__legend">I am</legend>
+        <div class="choices">
+          <label class="choice">
+            <input type="radio" name="audience" value="youth" checked>
+            <span>Looking for hours<small>15 to 25 years old</small></span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="audience" value="organization">
+            <span>An organization<small>Charity, non-profit, or league</small></span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="field" data-field>
+        <label for="message">Why do you want access? <span class="req" aria-hidden="true">*</span></label>
+        <span class="hint">What you are hoping to get out of Rally. A couple of sentences is plenty.</span>
+        <textarea id="message" name="message" required minlength="10"
+                  data-error="A sentence or two, so we know how to help."></textarea>
+        <p class="field-error" id="message-error" role="alert"></p>
+      </div>
+
+      <button class="btn btn--primary" type="submit" id="submitBtn">Request early access</button>
+
+      <p class="form-foot">We use what you send here only to contact you about Rally. See the <a href="legal/privacy.html">Privacy Policy</a>.</p>
+
+      <div class="form-status" id="formStatus" role="status" aria-live="polite"></div>
+    </form>
+
+    <div class="form-done" id="formDone">
+      <div class="form-done__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5 9.5 18 20 6.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Got it</h2>
+      <p>Thanks. We will email you when Rally opens in your area.</p>
+    </div>
+
+  </div>
+
+</main>
+
+<nav class="doc-foot" aria-label="Legal">
+  <a href="legal/accessibility.html">Accessibility</a>
+  <a href="legal/terms.html">Terms of service</a>
+  <a href="legal/privacy.html">Privacy policy</a>
+  <a href="legal/cookies.html">Cookie policy</a>
+  <a href="index.html">Home</a>
+</nav>
+
+<script src="assets/js/form.js"></script>
+</body>
+</html>

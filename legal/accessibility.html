@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility statement · Rally</title>
+<meta name="description" content="Rally's accessibility statement, our WCAG 2.1 Level AA target, known limitations, and how to give feedback or request an accessible format.">
+<meta name="theme-color" content="#faf7f0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<link rel="stylesheet" href="../assets/css/legal.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='6' fill='%2314532d'/><path d='M7.6 4.4v15.2' stroke='%23faf7f0' stroke-width='2' stroke-linecap='round'/><path d='M7.6 5.6h9.6l-2.6 3.4 2.6 3.4H7.6z' fill='%23faf7f0'/></svg>">
+</head>
+<body>
+
+<!--
+  ==========================================================================
+  NOT REVIEWED BY A LAWYER, AND NOT YET AUDITED.
+
+  Everything under "What we have done" was built deliberately and verified in
+  code and in a browser. Contrast was checked numerically. But no screen
+  reader test and no third-party audit has been run, which is why the
+  conformance claim below is worded as a target rather than a result.
+
+  Do not upgrade that wording to a conformance claim until a real audit backs
+  it. Publishing an inaccurate accessibility statement is worse than
+  publishing none.
+
+  REVIEW: AODA information and communications obligations scale with how many
+  employees the organization has in Ontario. Confirm with counsel which ones
+  currently apply to True Meridian AI and adjust the "standard" section.
+  The staff training section is a placeholder until training actually exists.
+  ==========================================================================
+-->
+
+<a class="skip-link" href="#doc">Skip to content</a>
+
+<header class="doc-head">
+  <a class="wordmark" href="../index.html">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M7.6 4.4v15.2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/>
+      <path d="M7.6 5.6h10l-2.7 3.5 2.7 3.5h-10z" fill="currentColor"/>
+    </svg>
+    Rally
+  </a>
+  <a class="btn btn--ghost" href="../index.html">Back to site</a>
+</header>
+
+<main class="doc" id="doc">
+
+<h1>Accessibility statement</h1>
+
+<div class="doc__meta">
+  <span>Last updated 4 August 2026</span>
+  <span>Applies to the Rally website and mobile app</span>
+</div>
+
+<h2>Our commitment</h2>
+<p><strong>True Meridian AI</strong>, which operates Rally, is working to make its website and mobile app usable by as many people as possible, including people who use screen readers, magnification, voice control, switch access, or keyboard-only navigation.</p>
+<p>Rally is used by people aged 15 to 25 and by staff and volunteers at community organizations. Both groups include people with disabilities, and a platform that exists to open up opportunities is not doing its job if parts of it are closed off.</p>
+
+<h2>The standard we are working to</h2>
+<p>We are aiming for <strong>WCAG 2.1 Level AA</strong>. We also work to meet our obligations under the <em>Accessibility for Ontarians with Disabilities Act, 2005</em> (AODA) and its Integrated Accessibility Standards Regulation.</p>
+<p>Treat that as a target we hold ourselves to rather than an audited result. The known limitations below explain what is still outstanding.</p>
+
+<h2>What we have done</h2>
+<p>The following are built into the current website. Each needs to be re-confirmed after any significant redesign.</p>
+<ul>
+  <li>Headings, landmarks, lists, and buttons use real HTML elements rather than styled generic containers, so assistive technology can announce structure.</li>
+  <li>Every interactive control can be reached and operated with a keyboard, and focus is shown with a visible outline that meets contrast requirements.</li>
+  <li>A "skip to content" link is the first thing in the tab order on every page.</li>
+  <li>Every text and background pair in the design was checked numerically against WCAG AA. All of them meet or exceed 4.5:1.</li>
+  <li>The scrolling animation on the home page respects the <code>prefers-reduced-motion</code> setting. When that setting is on, the animation, the sliding category strip, the smooth scrolling, and the counter all stop, and the page becomes an ordinary static layout.</li>
+  <li>Smooth scrolling only takes over for mouse wheels. Touch scrolling, keyboard scrolling, and the scrollbar are left exactly as the browser provides them.</li>
+  <li>The animated phone in the hero is decorative and hidden from screen readers. The information it illustrates is written out in the surrounding text.</li>
+  <li>The sliding category strip is duplicated as a plain text list for screen readers, so its content is not lost to the animation.</li>
+  <li>That strip has a visible pause control that works with keyboard and touch, not only with a mouse hover, so moving content can be stopped.</li>
+  <li>The frequently asked questions use native disclosure elements, so they work with assistive technology and with JavaScript disabled.</li>
+  <li>The early access form labels every field properly, marks required fields in text as well as colour, announces validation errors through a live region, and moves focus to the first field that needs fixing.</li>
+  <li>Layout uses relative units and reflows to a single column on narrow screens and at high zoom levels.</li>
+</ul>
+
+<h2>Known limitations</h2>
+<p>We would rather name these than let you discover them.</p>
+<ul>
+  <li>The site has not yet been tested end to end with a screen reader. Until it has, our WCAG 2.1 AA statement is a target rather than a verified result.</li>
+  <li>The mobile app has not been audited. This statement covers the website. It will be updated once the app has been reviewed.</li>
+  <li>The photographs in the category strip are decorative and carry no alternative text, because the same information is given as text beside them. If that strip ever carries information not written out elsewhere, the images will need real descriptions.</li>
+  <li>Content supplied by host organizations, including listing titles and descriptions, is written by those organizations. We ask them to write clearly, but we do not control it.</li>
+</ul>
+
+<h2>Accessible formats and communication supports</h2>
+<p>If any part of Rally is not working for you, we will provide the information in another format at no extra cost. Tell us what format works and we will arrange it, or agree on an alternative with you if the one you have asked for is not workable.</p>
+
+<h2>Feedback</h2>
+<p>We want to hear when something does not work. Email <a href="mailto:caelen@truemeridianai.com">caelen@truemeridianai.com</a>.</p>
+<p>Tell us the page or screen, what you were trying to do, and what got in the way. If you use assistive technology, naming it helps us reproduce the problem.</p>
+<p>We aim to reply within <strong>five business days</strong>. If a fix will take longer than that, we will tell you what we are doing and roughly when to expect it. Feedback can be given anonymously, though we will not be able to reply if you do not leave contact details.</p>
+
+<h2>Staff training</h2>
+<p>Rally is currently run by a very small team. As we take on staff and volunteers, everyone will be trained on the Integrated Accessibility Standards and on the <em>Human Rights Code</em> as it applies to people with disabilities, before they begin work that touches the product or its users.</p>
+
+<h2>Enforcement</h2>
+<p>If you raise something with us and are not satisfied with how we handled it, you can contact the Accessibility Directorate of Ontario, or file an application with the Human Rights Tribunal of Ontario.</p>
+
+<h2>How this statement is maintained</h2>
+<p>We review this statement at least once a year, and after any significant change to the website or app. This version was prepared on 4 August 2026 based on a self-assessment, not a third-party audit.</p>
+
+</main>
+
+<nav class="doc-foot" aria-label="Legal">
+  <a href="accessibility.html" aria-current="page">Accessibility</a>
+  <a href="terms.html">Terms of service</a>
+  <a href="privacy.html">Privacy policy</a>
+  <a href="cookies.html">Cookie policy</a>
+  <a href="../index.html">Home</a>
+</nav>
+
+</body>
+</html>
