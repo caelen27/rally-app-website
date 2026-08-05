@@ -226,10 +226,13 @@ export function createPhone(canvas, opts = {}) {
 
   // Pro triangle: two down the left, one on the right sitting lower
   const LR = 6.5;                        // lens barrel radius
+  /* Isoceles, not lopsided. The third lens used to sit at -1.2 and further
+     out, so it was further from both of the others than they were from each
+     other and the triangle read crooked. */
   const lensAt = [
-    [CX + 8.4, CY + 8.4],   // reads top-left from behind
-    [CX + 8.4, CY - 8.4],   // bottom-left
-    [CX - 8.8, CY - 1.2]    // right, sitting lower
+    [CX + 8.5, CY + 8.6],   // reads top-left from behind
+    [CX + 8.5, CY - 8.6],   // bottom-left
+    [CX - 8.5, CY]          // right, level between them
   ];
 
   for (const [lx, ly] of lensAt) {
@@ -258,7 +261,7 @@ export function createPhone(canvas, opts = {}) {
     })
   );
   flash.rotation.x = Math.PI / 2;
-  flash.position.set(CX - 9.6, CY + 10.8, PLAT_Z - 0.15);
+  flash.position.set(CX - 9.8, CY + 10.6, PLAT_Z - 0.15);
   phone.add(flash);
 
   const lidar = new THREE.Mesh(
@@ -268,7 +271,7 @@ export function createPhone(canvas, opts = {}) {
     })
   );
   lidar.rotation.x = Math.PI / 2;
-  lidar.position.set(CX - 10.4, CY - 11.6, PLAT_Z - 0.15);
+  lidar.position.set(CX - 9.8, CY - 10.6, PLAT_Z - 0.15);
   phone.add(lidar);
 
   /* ---------- buttons ---------- */

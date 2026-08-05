@@ -137,15 +137,22 @@
      about two percent of the scroll. rx also stays a few degrees off zero
      throughout, so a rail and the camera bump are always catching light. */
   var ARC = [
-    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 19, ty: 70, s: 1.02 },
-    { p: 0.20, rx:  6, ry:  -38, rz:  -2, tx: 23, ty:  6, s: 1.10 },
-    { p: 0.36, rx:  5, ry:  -66, rz:  -5, tx: 25, ty: -1, s: 1.13 },
-    { p: 0.42, rx:  7, ry: -114, rz:  -6, tx: 25, ty: -1, s: 1.13 },
-    { p: 0.52, rx:  3, ry: -186, rz:  -9, tx: 22, ty: -2, s: 1.12 },
-    { p: 0.62, rx:  6, ry: -252, rz: -12, tx: 19, ty:  0, s: 1.11 },
-    { p: 0.68, rx:  4, ry: -296, rz: -16, tx: 16, ty:  1, s: 1.11 },
-    { p: 0.82, rx: -2, ry: -344, rz: -40, tx:  9, ty:  3, s: 1.14 },
-    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  9, s: 1.22 }
+    /* ty at p 0 is small on purpose. It used to be 70, which dropped the body
+       most of its own height below centre: on first paint the device was cut
+       off by the bottom of the viewport and colliding with the floating CTA.
+       A few units still reads as a rise into place without landing badly. */
+    /* Sized to fit whole between the headline and the fold. The two display
+       lines eat the top 300px and the device is taller than what is left at
+       full scale, so it starts a little smaller and grows into the scroll. */
+    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 28, ty: 20, s: 0.92 },
+    { p: 0.20, rx:  6, ry:  -38, rz:  -2, tx: 27, ty:  4, s: 1.08 },
+    { p: 0.36, rx:  5, ry:  -66, rz:  -5, tx: 28, ty: -1, s: 1.10 },
+    { p: 0.42, rx:  7, ry: -114, rz:  -6, tx: 28, ty: -1, s: 1.10 },
+    { p: 0.52, rx:  3, ry: -186, rz:  -9, tx: 26, ty: -2, s: 1.09 },
+    { p: 0.62, rx:  6, ry: -252, rz: -12, tx: 23, ty:  0, s: 1.08 },
+    { p: 0.68, rx:  4, ry: -296, rz: -16, tx: 20, ty:  1, s: 1.08 },
+    { p: 0.82, rx: -2, ry: -344, rz: -40, tx: 11, ty:  3, s: 1.11 },
+    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  7, s: 1.18 }
   ];
 
   /* Once the layout is a single column the headline and the CTA block eat

@@ -468,7 +468,7 @@
    module, older browser) leaves the CSS build in place untouched, so the
    page degrades rather than breaking. */
 import { createPhone } from "./assets/js/phone3d.js";
-import { paintScreen, SCREEN_W, SCREEN_H } from "./assets/js/screen.js";
+import { paintScreen, resetLayers, SCREEN_W, SCREEN_H } from "./assets/js/screen.js";
 
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -526,6 +526,7 @@ try {
      bakes in the fallback face and never updates. */
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function () {
+      resetLayers();
       paintScreen(screenCanvas, blend);
       phone.refreshScreen();
       settle();
