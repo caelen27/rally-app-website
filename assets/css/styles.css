@@ -108,13 +108,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   margin: 0;
 }
 
-/* 122 resolves to 91.5px at 1440. flowty.co sets its hero at 127.5px, but
-   over lines of 12 and 15 characters; these run to 16 and 19, so matching
-   the original's proportion (a headline about 55 percent of the viewport,
-   clipping only the near edge of a centred device) means matching the line
-   length rather than the point size. At 148 the line ran to 81 percent and
-   crossed the whole body. */
-.display     { font-size: calc(122 * var(--px)); line-height: 0.88; }
+/* 170 resolves to 127.5px at 1440, flowty.co's exact hero size. The hero
+   headline is broken into four short lines so it stays clear of the device
+   sitting centre-right; the threaded chapters below split their headline
+   left and right of the dead-centre device. */
+.display     { font-size: calc(170 * var(--px)); line-height: 0.88; }
 .display--xl { font-size: calc(250 * var(--px)); line-height: 0.94; letter-spacing: -0.025em; }
 .display--md { font-size: calc(96 * var(--px));  line-height: 0.96; }
 
@@ -286,7 +284,12 @@ section { position: relative; }
    Scroll track — sticky 3D phone + three chapters
    ========================================================================= */
 
-.track { position: relative; z-index: 1; }
+/* A short tail (not a full viewport) extends the sticky travel just past the
+   third chapter's centre so the device is solidly pinned while that chapter
+   is framed, then releases and scrolls up together with the chapter into the
+   next section. A full 100vh here left an empty band after the device exited
+   before the next section arrived. */
+.track { position: relative; z-index: 1; padding-bottom: 30vh; }
 
 /* The chapters are pulled up over the stage with a negative margin-top on
    THEM, not a negative margin-bottom here. A negative bottom margin would
@@ -308,7 +311,9 @@ section { position: relative; }
   width: 100%;
   height: 100%;
   perspective: calc(2000 * var(--px));
-  perspective-origin: 62% 50%;
+  /* dead centre: the device sits in the middle of the viewport and the
+     headline threads around it, left and right */
+  perspective-origin: 50% 50%;
 }
 
 .phone {
@@ -900,6 +905,7 @@ section { position: relative; }
 .chapters { position: relative; z-index: 3; margin-top: -100vh; }
 
 .chapter {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -910,6 +916,38 @@ section { position: relative; }
 .chapter > * { pointer-events: auto; }
 .chapter__head { max-width: calc(1560 * var(--px)); }
 .chapter__foot { max-width: calc(620 * var(--px)); }
+
+/* Threaded chapters: the big headline splits left and right of the
+   dead-centre device, both halves vertically centred, so the text reads as
+   wrapping around the phone the way flowty's "On Your Wrist" section does. */
+.chapter--thread {
+  justify-content: center;
+  padding-block: calc(120 * var(--px));
+}
+.thread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  /* the centre gap is where the device sits */
+  gap: calc(360 * var(--px));
+  /* slightly smaller than the hero so the flanking halves clear the device
+     without running off the viewport edge */
+  font-size: calc(132 * var(--px));
+  line-height: 0.9;
+}
+.thread__l,
+.thread__r { max-width: calc(560 * var(--px)); }
+.thread__l { text-align: right; }
+.thread__r { text-align: left; }
+/* the supporting line sits under the right half, clear of the device */
+.thread__lede {
+  position: absolute;
+  right: calc(64 * var(--px));
+  bottom: calc(96 * var(--px));
+  text-align: right;
+  max-width: calc(520 * var(--px));
+}
 
 .hero-actions {
   display: flex;

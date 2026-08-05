@@ -125,34 +125,41 @@
   var scrHome = document.getElementById("scrHome");
   var scrShift = document.getElementById("scrShift");
 
-  /* The screen is the interesting face, so the arc keeps it toward the viewer
-     for most of the scroll. rotateY still completes a full turn, but the
-     back-facing stretch is compressed into a fast sweep around p 0.4 to 0.55
-     instead of being held. Ends in landscape at rotateZ -90. */
-  /* The keyframes bracketing each perpendicular (0.36/0.42 around -90, and
-     0.62/0.68 around -270) sit close together on purpose. Smootherstep eases
-     to a stop at every segment boundary, so a keyframe near 90 degrees parks
-     the phone exactly edge-on, where it reads as a grey slab. Bracketing it
-     tightly means the body is only within ten degrees of perpendicular for
-     about two percent of the scroll. rx also stays a few degrees off zero
-     throughout, so a rail and the camera bump are always catching light. */
+  /* The device sits dead centre for the whole scroll (tx and ty stay 0) while
+     the big headline threads around it, left and right. It tumbles a full turn
+     on Y so the screen faces the viewer at the start and end and the camera
+     back shows through the middle. It stays PORTRAIT the whole way: the old
+     arc twisted to landscape (rz -90) to end on a "standing" pose, which read
+     badly, so rz now holds a gentle constant lean instead.
+
+     The keyframes bracketing each perpendicular (0.34/0.44 around -90, and
+     0.58/0.68 around -270) sit close together on purpose. Smootherstep eases
+     to a stop at every segment boundary, so a keyframe parked near 90 degrees
+     would hold the phone edge-on as a grey slab; bracketing it tightly means
+     the body is only within ten degrees of perpendicular for a sliver of the
+     scroll. rx holds a few degrees so a rail or the camera bump always catches
+     light rather than the body going flat. */
+  /* Because the chapters are pulled up 100vh over the sticky stage, each
+     chapter's CENTRE sits at p 0, 0.333, 0.667 and the two chapter boundaries
+     at p 0.167 and 0.5. The tumble parks a clean face at every centre (front
+     at the hero, the back/camera at chapter two, front again at chapter three)
+     and crosses edge-on (90 and 270 degrees) only at the boundaries. No
+     keyframe sits AT an edge-on angle: smootherstep eases to a stop at each
+     keyframe, so a keyframe on 90 would park the body edge-on as a thin slab.
+     Instead the edge angles are crossed mid-segment, at speed. */
+  /* The hero (p 0) keeps the device centre-RIGHT so the left headline runs
+     clear, exactly like flowty's hero. It slides to dead centre by the time
+     the first threaded chapter arrives (p 0.24 onward), where the headline
+     splits around it. */
   var ARC = [
-    /* Measured off flowty.co at 1440x900. Its stage is a full-viewport box
-       carrying transform: scale(0.7) and NO translate, so the device starts
-       dead centre, a little above the midline, and the headline crosses its
-       top corner. The body also holds a constant clockwise lean of roughly a
-       dozen degrees the whole way round; standing it bolt upright at rz 1 is
-       what read as tilted wrong. It drifts up and right through the middle
-       of the arc, the way the original does. */
-    { p: 0.00, rx:  9, ry:  -20, rz: -12, tx:  0, ty: -6, s: 0.84 },
-    { p: 0.20, rx:  6, ry:  -38, rz: -14, tx:  8, ty: -2, s: 0.96 },
-    { p: 0.36, rx:  5, ry:  -66, rz: -16, tx: 14, ty: -4, s: 1.00 },
-    { p: 0.42, rx:  7, ry: -114, rz: -17, tx: 14, ty: -4, s: 1.00 },
-    { p: 0.52, rx:  3, ry: -186, rz: -19, tx: 12, ty: -5, s: 0.99 },
-    { p: 0.62, rx:  6, ry: -252, rz: -21, tx:  9, ty: -3, s: 0.98 },
-    { p: 0.68, rx:  4, ry: -296, rz: -24, tx:  7, ty: -2, s: 0.98 },
-    { p: 0.82, rx: -2, ry: -344, rz: -48, tx:  4, ty:  0, s: 1.02 },
-    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  4, s: 1.10 }
+    { p: 0.00, rx: 8, ry:   -8, rz: -6, tx: 17, ty: 0, s: 0.90 },
+    { p: 0.10, rx: 8, ry:  -36, rz: -6, tx: 12, ty: 0, s: 0.91 },
+    { p: 0.24, rx: 8, ry: -140, rz: -6, tx:  0, ty: 0, s: 0.92 },
+    { p: 0.333, rx: 8, ry: -180, rz: -6, tx: 0, ty: 0, s: 0.92 },
+    { p: 0.42, rx: 8, ry: -220, rz: -6, tx: 0, ty: 0, s: 0.92 },
+    { p: 0.57, rx: 8, ry: -320, rz: -6, tx: 0, ty: 0, s: 0.92 },
+    { p: 0.667, rx: 8, ry: -360, rz: -6, tx: 0, ty: 0, s: 0.92 },
+    { p: 1.00, rx: 8, ry: -360, rz: -6, tx: 0, ty: 0, s: 0.90 }
   ];
 
   /* Once the layout is a single column the headline and the CTA block eat
@@ -344,7 +351,10 @@
     var gl = window.__phone3d;
     if (gl) {
       gl.setPose(rx, ry, rz, sample(arc, "tx", p), sample(arc, "ty", p), sc);
-      gl.setBlend(window01(p, 0.45, 0.58));
+      /* The front face holds the home screen the whole way. The old arc
+         crossfaded to a landscape shift UI for the standing end pose; that
+         pose is gone, so the blend stays at 0. */
+      gl.setBlend(0);
       gl.draw();
       updateVeil(sc);
       return;
@@ -361,10 +371,10 @@
     applyLight(rx, ry, rz);
     updateVeil(sc);
 
-    // swapped inside the back-facing window (roughly p 0.42 to 0.66), so the
-    // crossfade happens behind the device and is never seen
-    scrHome.style.opacity = 1 - window01(p, 0.45, 0.52);
-    scrShift.style.opacity = window01(p, 0.53, 0.60);
+    // the CSS fallback holds the home screen the whole way, matching the
+    // WebGL path; the landscape shift screen is no longer shown
+    scrHome.style.opacity = 1;
+    scrShift.style.opacity = 0;
   }
 
   var lastFrameT = 0;
