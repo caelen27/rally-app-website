@@ -1476,6 +1476,15 @@ details p {
     top: auto; left: auto; margin: 0 auto;
     transform: rotateX(-4deg) rotateY(-16deg) rotateZ(0deg) !important;
   }
+  /* The WebGL canvas is absolutely positioned inside the stage, and with
+     nothing pinned the stage has no height at all, so the device silently
+     vanished in this branch. Both need a real block size here. */
+  .stage { position: relative; height: auto; }
+  .stage.is-gl .stage-gl {
+    position: relative;
+    height: calc(660 * var(--px));
+  }
+
   .scr--home { opacity: 1 !important; }
   .scr--shift { opacity: 0 !important; }
   .chapter { min-height: 0; padding-block: calc(90 * var(--px)); }

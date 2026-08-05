@@ -10,8 +10,16 @@
    settles into landscape at the end of the arc it reads upright.
    ========================================================================= */
 
-export const SCREEN_W = 720;
-export const SCREEN_H = 1568;   // matches the 66.3 x 144.4mm display
+/* The texture is the panel's real pixel count: 2622 x 1206 on a 6.3 inch
+   display. It used to be 720 wide, which was below what the device covers on
+   a retina screen once it fills the stage, so the whole UI came out soft. */
+export const SCREEN_W = 1206;
+export const SCREEN_H = 2622;
+
+/* Layout is authored against a fixed 720-wide box and scaled up on paint, so
+   the coordinates below stay readable and the texture can be resized without
+   touching any of them. 720 x 1565 is the display's true 2.174 aspect. */
+const DW = 720, DH = 1565;
 
 const GREEN = "#4ade80";
 const TEXT = "#e9e9ef";
@@ -153,9 +161,12 @@ function shift(c, w, h) {
   /* Drawn a quarter turn round, because the body finishes the arc rotated
      into landscape. Working in the rotated frame means the layout below is
      written the way it is actually read. */
+  /* Counter-clockwise, against the body's -90 settle on Z. Turning it the
+     same way as the body compounds to 180 and the shift screen reads upside
+     down at the end of the arc. */
   c.save();
-  c.translate(w, 0);
-  c.rotate(Math.PI / 2);
+  c.translate(0, h);
+  c.rotate(-Math.PI / 2);
   const lw = h, lh = w;          // landscape extents
 
   c.fillStyle = "#0a0a0b";
@@ -205,12 +216,15 @@ function shift(c, w, h) {
 /** Paint both screens with a crossfade. blend 0 = home, 1 = on-shift. */
 export function paintScreen(canvas, blend) {
   const c = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  c.clearRect(0, 0, w, h);
-  c.fillStyle = "#0a0a0b";
-  c.fillRect(0, 0, w, h);
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (blend < 1) { c.globalAlpha = 1 - blend; home(c, w, h); }
-  if (blend > 0) { c.globalAlpha = blend; shift(c, w, h); }
+  const s = canvas.width / DW;
+  c.setTransform(s, 0, 0, s, 0, 0);
+  c.fillStyle = "#0a0a0b";
+  c.fillRect(0, 0, DW, DH);
+
+  if (blend < 1) { c.globalAlpha = 1 - blend; home(c, DW, DH); }
+  if (blend > 0) { c.globalAlpha = blend; shift(c, DW, DH); }
   c.globalAlpha = 1;
 }

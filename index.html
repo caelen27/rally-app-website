@@ -491,8 +491,10 @@ try {
     if (r.width && r.height) phone.resize(r.width, r.height, narrowQ.matches ? 1.95 : 1.36);
   }
   fit();
-  new ResizeObserver(fit).observe(stage);
-  narrowQ.addEventListener("change", function () { fit(); phone.draw(); });
+  // draw as well as resize, or a layout change leaves a correctly sized but
+  // never repainted canvas (which is what reduced motion hit)
+  new ResizeObserver(function () { fit(); settle(); }).observe(stage);
+  narrowQ.addEventListener("change", function () { fit(); settle(); });
 
   let blend = 0;
   window.__phone3d = {
@@ -511,20 +513,26 @@ try {
 
   stage.classList.add("is-gl");
 
+  /* Take the current pose. Under reduced motion the scrub is never wired up,
+     so the device parks in the same static pose the CSS fallback uses; asking
+     main.js to snap would run the scroll arc and undo it. */
+  function settle() {
+    if (reduce.matches) phone.setPose(-4, -16, 0, 0, 0, 1);
+    else if (window.__rallySnap) window.__rallySnap();
+    phone.draw();
+  }
+
   /* Outfit has to be resident before the screen is painted, or the texture
      bakes in the fallback face and never updates. */
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function () {
       paintScreen(screenCanvas, blend);
       phone.refreshScreen();
-      if (window.__rallySnap) window.__rallySnap();
-      phone.draw();
+      settle();
     });
   }
 
-  if (window.__rallySnap) window.__rallySnap();
-  phone.draw();
-  if (reduce.matches) { phone.setPose(-4, -22, 0, 0, 0, 1); phone.draw(); }
+  settle();
 } catch (e) {
   console.warn("3D device unavailable, keeping the CSS build:", e && e.message);
 }
