@@ -141,10 +141,9 @@
        most of its own height below centre: on first paint the device was cut
        off by the bottom of the viewport and colliding with the floating CTA.
        A few units still reads as a rise into place without landing badly. */
-    /* Sized to fit whole between the headline and the fold. The two display
-       lines eat the top 300px and the device is taller than what is left at
-       full scale, so it starts a little smaller and grows into the scroll. */
-    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 28, ty: 20, s: 0.92 },
+    /* Centred vertically on load. It starts a little under full scale so the
+       whole body is in frame on a short viewport, and grows into the scroll. */
+    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 28, ty:  0, s: 0.92 },
     { p: 0.20, rx:  6, ry:  -38, rz:  -2, tx: 27, ty:  4, s: 1.08 },
     { p: 0.36, rx:  5, ry:  -66, rz:  -5, tx: 28, ty: -1, s: 1.10 },
     { p: 0.42, rx:  7, ry: -114, rz:  -6, tx: 28, ty: -1, s: 1.10 },

@@ -188,12 +188,15 @@ keyframe table in `main.js` (`ARC`), sampled with smootherstep. The phone
 completes a full -360 degree turn on Y and settles at -90 on Z, landing in
 landscape on the shift tracker.
 
-At p 0 the device sits a little smaller and slightly low, sized to fit whole
-between the headline and the fold. The two display lines eat the top 300px
-and the body is taller than what is left at full scale. `ty` was originally
-70, which dropped it most of its own height below centre: on first paint it
-was cut off by the bottom of the viewport and colliding with the floating
-CTA. `tx` runs a few units wider than it used to across the whole arc, so the
+At p 0 the device is centred vertically, at slightly under full scale so the
+whole body is in frame on a short viewport. `ty` was originally 70, which
+dropped it most of its own height below centre: on first paint it was cut off
+by the bottom of the viewport and colliding with the floating CTA.
+
+Centred means the hero headline crosses the top of the device, because the
+two display lines occupy the top third of the viewport and the body is taller
+than what is left below them. That overlap is the cost of centring, not a
+bug; the alternative is starting it low, which is what was cut off before. `tx` runs a few units wider than it used to across the whole arc, so the
 body clears the display headings it would otherwise sit on.
 
 The arc is weighted so the screen faces the viewer for roughly 80 percent of
