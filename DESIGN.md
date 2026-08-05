@@ -188,15 +188,36 @@ keyframe table in `main.js` (`ARC`), sampled with smootherstep. The phone
 completes a full -360 degree turn on Y and settles at -90 on Z, landing in
 landscape on the shift tracker.
 
-At p 0 the device is centred vertically, at slightly under full scale so the
-whole body is in frame on a short viewport. `ty` was originally 70, which
-dropped it most of its own height below centre: on first paint it was cut off
-by the bottom of the viewport and colliding with the floating CTA.
+### Measured off the original
 
-Centred means the hero headline crosses the top of the device, because the
-two display lines occupy the top third of the viewport and the body is taller
-than what is left below them. That overlap is the cost of centring, not a
-bug; the alternative is starting it low, which is what was cut off before. `tx` runs a few units wider than it used to across the whole arc, so the
+Taken from flowty.co at 1440x900, since several rounds of nudging the pose by
+eye all missed the same structural point.
+
+| | flowty.co | note |
+|---|---|---|
+| stage element | `.phone-spline-scene` | `position: absolute; inset: 0` |
+| stage box | 1440 x 900, `transform: scale(0.7)` | **no translate at all** |
+| rendered | 1008 x 630 at (216, 135) | centre (720, 450), dead centre |
+| hero h1 | 127.5px / 112.2 lh / -2.55px tracking | weight 400 |
+| h1 width | 783px, **54.4% of viewport** | two lines, 12 and 15 characters |
+| h1 bottom | 260 | device top is 135, so the headline crosses it |
+| scroller | Lenis on `.page-wrapper` | scrollHeight 13741 |
+
+The device starts **dead centre**, a little above the midline, leaning
+clockwise about a dozen degrees, and holds that lean the whole way round. It
+drifts up and right through the middle of the arc. Standing it upright at
+rz 1 and parking it at tx 28 was the thing that read as both off-centre and
+tilted wrong.
+
+The headline crossing the device is intentional in the original: at p 0 the
+end of the first line clips the near edge, nothing more.
+
+**That only works because the original's lines are short.** Rally's read 16
+and 19 characters against flowty's 12 and 15, so at the old 148 the headline
+ran to 81 percent of the viewport and crossed the entire body rather than
+clipping its edge. Matching the original's proportion meant matching the line
+length, not the point size: `.display` is 122, and the hero breaks over three
+lines with the flag mid-line, the way flowty sets `Digital * Noise`. `tx` runs a few units wider than it used to across the whole arc, so the
 body clears the display headings it would otherwise sit on.
 
 The arc is weighted so the screen faces the viewer for roughly 80 percent of

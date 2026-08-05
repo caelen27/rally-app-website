@@ -137,21 +137,22 @@
      about two percent of the scroll. rx also stays a few degrees off zero
      throughout, so a rail and the camera bump are always catching light. */
   var ARC = [
-    /* ty at p 0 is small on purpose. It used to be 70, which dropped the body
-       most of its own height below centre: on first paint the device was cut
-       off by the bottom of the viewport and colliding with the floating CTA.
-       A few units still reads as a rise into place without landing badly. */
-    /* Centred vertically on load. It starts a little under full scale so the
-       whole body is in frame on a short viewport, and grows into the scroll. */
-    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 28, ty:  0, s: 0.92 },
-    { p: 0.20, rx:  6, ry:  -38, rz:  -2, tx: 27, ty:  4, s: 1.08 },
-    { p: 0.36, rx:  5, ry:  -66, rz:  -5, tx: 28, ty: -1, s: 1.10 },
-    { p: 0.42, rx:  7, ry: -114, rz:  -6, tx: 28, ty: -1, s: 1.10 },
-    { p: 0.52, rx:  3, ry: -186, rz:  -9, tx: 26, ty: -2, s: 1.09 },
-    { p: 0.62, rx:  6, ry: -252, rz: -12, tx: 23, ty:  0, s: 1.08 },
-    { p: 0.68, rx:  4, ry: -296, rz: -16, tx: 20, ty:  1, s: 1.08 },
-    { p: 0.82, rx: -2, ry: -344, rz: -40, tx: 11, ty:  3, s: 1.11 },
-    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  7, s: 1.18 }
+    /* Measured off flowty.co at 1440x900. Its stage is a full-viewport box
+       carrying transform: scale(0.7) and NO translate, so the device starts
+       dead centre, a little above the midline, and the headline crosses its
+       top corner. The body also holds a constant clockwise lean of roughly a
+       dozen degrees the whole way round; standing it bolt upright at rz 1 is
+       what read as tilted wrong. It drifts up and right through the middle
+       of the arc, the way the original does. */
+    { p: 0.00, rx:  9, ry:  -20, rz: -12, tx:  0, ty: -6, s: 0.84 },
+    { p: 0.20, rx:  6, ry:  -38, rz: -14, tx:  8, ty: -2, s: 0.96 },
+    { p: 0.36, rx:  5, ry:  -66, rz: -16, tx: 14, ty: -4, s: 1.00 },
+    { p: 0.42, rx:  7, ry: -114, rz: -17, tx: 14, ty: -4, s: 1.00 },
+    { p: 0.52, rx:  3, ry: -186, rz: -19, tx: 12, ty: -5, s: 0.99 },
+    { p: 0.62, rx:  6, ry: -252, rz: -21, tx:  9, ty: -3, s: 0.98 },
+    { p: 0.68, rx:  4, ry: -296, rz: -24, tx:  7, ty: -2, s: 0.98 },
+    { p: 0.82, rx: -2, ry: -344, rz: -48, tx:  4, ty:  0, s: 1.02 },
+    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  4, s: 1.10 }
   ];
 
   /* Once the layout is a single column the headline and the CTA block eat

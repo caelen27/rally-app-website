@@ -108,7 +108,13 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
   margin: 0;
 }
 
-.display     { font-size: calc(148 * var(--px)); line-height: 0.88; }
+/* 122 resolves to 91.5px at 1440. flowty.co sets its hero at 127.5px, but
+   over lines of 12 and 15 characters; these run to 16 and 19, so matching
+   the original's proportion (a headline about 55 percent of the viewport,
+   clipping only the near edge of a centred device) means matching the line
+   length rather than the point size. At 148 the line ran to 81 percent and
+   crossed the whole body. */
+.display     { font-size: calc(122 * var(--px)); line-height: 0.88; }
 .display--xl { font-size: calc(250 * var(--px)); line-height: 0.94; letter-spacing: -0.025em; }
 .display--md { font-size: calc(96 * var(--px));  line-height: 0.96; }
 
