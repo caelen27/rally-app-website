@@ -23,9 +23,14 @@ import * as THREE from "three";
 import { RoundedBoxGeometry } from "../vendor/RoundedBoxGeometry.js";
 import { RoomEnvironment } from "../vendor/RoomEnvironment.js";
 
-const W = 71.5, H = 149.6, D = 8.25;
+const W = 71.5, H = 149.6, D = 6.9;
 const R = 11.6;                     // outer corner radius
-const BEV = 1.35;                   // how far the rail rolls over front and back
+/* D is pulled in from the real 8.25mm. At true scale the body read chunky in
+   the dead-centre composition, where the edge-on transition frames put the
+   full depth on show; a slightly slimmer section reads as the premium device
+   without looking wrong from the face. BEV is tighter to match, so the rail
+   is a crisp roll rather than a fat chamfer. */
+const BEV = 1.05;                   // how far the rail rolls over front and back
 
 // the flat faces the bevel leaves at each end
 const IW = W - BEV * 2, IH = H - BEV * 2, IR = R - BEV;
@@ -109,19 +114,21 @@ export function createPhone(canvas, opts = {}) {
   });
 
   const lensRing = new THREE.MeshPhysicalMaterial({
-    color: 0x3a4048,
+    color: 0x4a515a,
     metalness: 1.0,
-    roughness: 0.18,
-    envMapIntensity: 1.6
+    roughness: 0.12,
+    envMapIntensity: 2.0
   });
 
+  // deep blue-black with a mirror clearcoat: real camera glass reads almost
+  // black but throws a cold rim highlight when it catches light
   const lensGlass = new THREE.MeshPhysicalMaterial({
-    color: 0x05070b,
-    metalness: 0.1,
-    roughness: 0.05,
+    color: 0x060a12,
+    metalness: 0.2,
+    roughness: 0.03,
     clearcoat: 1.0,
     clearcoatRoughness: 0.02,
-    envMapIntensity: 2.4
+    envMapIntensity: 3.0
   });
 
   /* ---------- profile ---------- */
@@ -224,32 +231,47 @@ export function createPhone(canvas, opts = {}) {
   plateau.position.set(CX, CY, PLAT_Z + 0.55);
   phone.add(plateau);
 
-  // Pro triangle: two down the left, one on the right sitting lower
-  const LR = 6.5;                        // lens barrel radius
-  /* Isoceles, not lopsided. The third lens used to sit at -1.2 and further
-     out, so it was further from both of the others than they were from each
-     other and the triangle read crooked. */
+  // Pro triangle: two down the left, one on the right sitting level between.
+  // Isoceles so it does not read crooked.
+  const LR = 5.4;                        // lens outer bezel radius
   const lensAt = [
-    [CX + 8.5, CY + 8.6],   // reads top-left from behind
-    [CX + 8.5, CY - 8.6],   // bottom-left
-    [CX - 8.5, CY]          // right, level between them
+    [CX + 8.7, CY + 8.7],   // reads top-left from behind
+    [CX + 8.7, CY - 8.7],   // bottom-left
+    [CX - 8.7, CY]          // right, level between them
   ];
 
+  /* A real lens is a stack: a raised polished ring, a black barrel wall
+     stepping inward, then a domed element that catches a bright rim of the
+     environment. The old version was one fat cylinder plus a flat black disc,
+     which read as a button. */
   for (const [lx, ly] of lensAt) {
-    const barrel = new THREE.Mesh(
-      new THREE.CylinderGeometry(LR, LR * 0.9, 2.9, 56),
+    // raised polished bezel ring, seated proud of the plateau
+    const ring = new THREE.Mesh(
+      new THREE.CylinderGeometry(LR, LR, 1.5, 64),
       lensRing
     );
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(lx, ly, PLAT_Z - 0.75);
+    phone.add(ring);
+
+    // black barrel wall stepping in toward the glass
+    const barrel = new THREE.Mesh(
+      new THREE.CylinderGeometry(LR * 0.82, LR * 0.66, 1.4, 56),
+      new THREE.MeshPhysicalMaterial({
+        color: 0x0a0c10, metalness: 0.6, roughness: 0.5, envMapIntensity: 0.7
+      })
+    );
     barrel.rotation.x = Math.PI / 2;
-    barrel.position.set(lx, ly, PLAT_Z - 0.9);
+    barrel.position.set(lx, ly, PLAT_Z - 1.7);
     phone.add(barrel);
 
+    // domed glass element, deep and dark with a strong specular
     const glass = new THREE.Mesh(
-      new THREE.SphereGeometry(LR * 0.74, 40, 24),
+      new THREE.SphereGeometry(LR * 0.6, 48, 32),
       lensGlass
     );
-    glass.scale.z = 0.24;
-    glass.position.set(lx, ly, PLAT_Z - 2.1);
+    glass.scale.z = 0.5;
+    glass.position.set(lx, ly, PLAT_Z - 2.2);
     phone.add(glass);
   }
 
