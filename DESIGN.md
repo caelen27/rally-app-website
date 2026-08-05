@@ -79,50 +79,53 @@ between major blocks, `70 to 80` between a heading and its content.
 
 ## The pinned phone
 
-A real CSS 3D object, not an image or a video: six body faces under
-`transform-style: preserve-3d`, plus a camera bump built as its own box with
-four side walls, with the screen rendered as live HTML so it stays crisp and
-themeable. The original uses a Spline WebGL scene, which is their asset and
-was not copied.
+**WebGL, via three.js.** It was a CSS 3D build for several revisions and that
+was the wrong tool. CSS 3D has no curved surfaces: every face is a flat plane,
+so the edge where a rail meets the glass can only be a hard 90 degree joint or
+a fan of flat strips approximating an arc. Either way it reads as panels taped
+together, because that is what it is. Successive passes fixed the value range,
+closed the corners, and added a per-frame key light, and it still looked like
+a kit of parts. The ceiling was structural, not a matter of more gradient work.
 
-Modelled on a black-titanium Pro. Three things carry the likeness, and all
-three were wrong in the first attempt:
+`assets/js/phone3d.js` builds the body as one rounded solid with genuinely
+curved edges, lit by a `RoomEnvironment` probe. The travelling highlight that
+runs along the chamfer as the body turns is the thing that says machined
+metal, and it is not expressible in CSS at any effort level.
 
-- **Value range.** The reference body is near-black; its brightest point
-  barely clears `#5d`. The first pass used near-chrome rails peaking at
-  `#cfd5db` and the whole thing read as cheap plastic. Keep the range low.
-- **Camera bump depth.** The plateau is pushed out along the back face's
-  local +Z with walls spanning back to the panel. This is what makes the
-  edge-on frame legible: you see lens barrels in profile rather than a flat
-  slab. It requires the back face to be `preserve-3d` and **not**
-  `overflow: hidden`, since an overflow clip forces a flat rendering context
-  and collapses the bump into the panel.
-- **Buttons that protrude.** `translateZ` on the nubs, which needs
-  `preserve-3d` on the rail.
+Geometry is in millimetres, taken from a 16 Pro: 71.5 x 149.6 x 8.25.
 
-Both the rails and the nubs need `backface-visibility: hidden`. Without it
-the far rail keeps painting, and once the body turns past 90 degrees
-perspective throws it clear of the silhouette as a detached floating bar.
+Details that matter:
 
-**Closed corners.** The rails have to stop short of the rounded outline, so
-the four vertical corners were open and you could see straight through the
-body at grazing angles. `main.js` generates a fan of seven narrow strips per
-corner, each tangent to the arc.
+- **The camera plateau is an ExtrudeGeometry, not a RoundedBoxGeometry.** That
+  helper takes one radius for all three axes, so a plateau three millimetres
+  deep gets its corner radius clamped to half the depth and comes out a
+  hard-cornered slab. Extruding a rounded-rect profile keeps the large corner
+  radius in X and Y and puts a small bevel on the rim.
+- **Handedness.** Viewed from the back, the bump sits top-left, which is +X in
+  the phone's own frame, because looking at the back mirrors X. Everything
+  inside the module is mirrored to match.
+- **A long lens.** 19 degrees of field of view. Product renders are shot long
+  because a wide angle bows the straight edges of a rectangular object, which
+  is exactly the blocky look being avoided.
+- **Rendering is on demand.** Nothing redraws unless the pose changes, so a
+  still page costs nothing and scroll stays at 60fps.
 
-**A real key light.** Every face used to carry a fixed gradient regardless of
-which way it pointed, so as the body turned the shading never moved and the
-panels read as separate flat stickers taped together. Each face's normal is
-now rotated into world space every frame, dotted with a fixed key light, and
-handed to CSS as `--lit`. This, plus the corners, is what makes the pieces
-read as one machined object rather than a kit of parts.
+The screen is a CanvasTexture painted by `assets/js/screen.js`. It was live
+HTML under the CSS build; WebGL cannot sample the DOM, so the same layout is
+drawn to a canvas instead. Both screens share one texture and crossfade on a
+blend value, and the landscape one is drawn a quarter turn round so it reads
+upright once the body settles into landscape. Outfit has to be resident before
+the first paint or the texture bakes in the fallback face, so the bootstrap
+waits on `document.fonts.ready`.
 
-**Never put opacity on `.phone`.** An opacity below 1 creates a grouping
-context, which forces `transform-style` back to flat and collapses the entire
-3D build: the front face renders through the back, screen text and all. Fade
-`.stage-wrap` instead, which has no 3D properties of its own.
+**The CSS device is still in the markup and still works.** If WebGL fails to
+initialise, `phone3d.js` throws, the `is-gl` class is never added, and the
+page shows the CSS build instead. Do not delete it.
 
-Dynamic Island, not a notch, and the status bar is pinned level with it
-rather than sitting underneath.
+Its on-screen height comes from `deviceHeight()`, not from the DOM. The
+backdrop fade needs to know what the device covers, and the CSS fallback is
+`display: none` once WebGL is up, so reading its `offsetHeight` returned zero
+and the fade silently never fired.
 
 Its pose is scrubbed from scroll progress through the `.track` section by a
 keyframe table in `main.js` (`ARC`), sampled with smootherstep. The phone

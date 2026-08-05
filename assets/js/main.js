@@ -288,7 +288,8 @@
   var phoneH = 0;
 
   function cacheVeil() {
-    phoneH = phone.offsetHeight;
+    var gl = window.__phone3d;
+    phoneH = (gl && gl.deviceHeight) ? gl.deviceHeight() : phone.offsetHeight;
     veilCache = veilBlocks.map(function (b) {
       var r = b.getBoundingClientRect();
       return { top: r.top + window.scrollY, h: r.height };
@@ -311,8 +312,13 @@
       var t = veilCache[i].top - y;
       var b = t + veilCache[i].h;
       if (b < fTop || t > fBot) continue;
+      /* Normalised against a small fixed distance, not against the height of
+         the block. Proportional made a tall heading whose last line clipped
+         the device score as barely overlapping, so it stayed near full
+         opacity with forest type sitting unreadably on top of it. Any real
+         overlap has to fade all the way. */
       var overlap = Math.min(fBot, b) - Math.max(fTop, t);
-      var frac = overlap / Math.max(1, Math.min(fBot - fTop, veilCache[i].h));
+      var frac = overlap / 60;
       if (frac > worst) worst = frac;
     }
     // floor of 0.20 is not arbitrary: at that value forest headings clear
@@ -324,6 +330,18 @@
   function render(p) {
     var rx = sample(arc, "rx", p), ry = sample(arc, "ry", p), rz = sample(arc, "rz", p);
     var sc = sample(arc, "s", p);
+
+    /* When WebGL came up, the same arc drives a real 3D body instead. The
+       keyframe table, the easing and the veil are all shared; only the thing
+       being posed changes. */
+    var gl = window.__phone3d;
+    if (gl) {
+      gl.setPose(rx, ry, rz, sample(arc, "tx", p), sample(arc, "ty", p), sc);
+      gl.setBlend(window01(p, 0.45, 0.58));
+      gl.draw();
+      updateVeil(sc);
+      return;
+    }
 
     phone.style.transform =
       "translate3d(" + sample(arc, "tx", p).toFixed(2) + "%," +
@@ -371,6 +389,9 @@
     target = eased = progress();
     render(eased);
   }
+
+  // the WebGL bootstrap calls this once it is ready, to take the first pose
+  window.__rallySnap = snap;
 
   if (phone && track && !reduce.matches) {
     snap();

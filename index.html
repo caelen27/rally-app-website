@@ -57,7 +57,10 @@
 <section class="track" id="track" aria-label="Introducing Rally">
 
   <div class="stage-wrap" aria-hidden="true">
-    <div class="stage">
+    <div class="stage" id="stage">
+      <!-- The CSS device below stays as the fallback. If WebGL initialises,
+           phone3d.js hides it and renders here instead. -->
+      <canvas class="stage-gl" id="stageGL"></canvas>
       <div class="phone" id="phone">
         <!-- front -->
         <div class="face face--front">
@@ -456,5 +459,75 @@
 </footer>
 
 <script src="assets/js/main.js"></script>
+
+<script type="importmap">
+{ "imports": { "three": "./assets/vendor/three.module.js" } }
+</script>
+<script type="module">
+/* Boots the WebGL device. Anything that goes wrong here (no WebGL, blocked
+   module, older browser) leaves the CSS build in place untouched, so the
+   page degrades rather than breaking. */
+import { createPhone } from "./assets/js/phone3d.js";
+import { paintScreen, SCREEN_W, SCREEN_H } from "./assets/js/screen.js";
+
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+try {
+  const canvas = document.getElementById("stageGL");
+  const stage = document.getElementById("stage");
+  if (!canvas || !stage) throw new Error("no stage");
+
+  const screenCanvas = document.createElement("canvas");
+  screenCanvas.width = SCREEN_W;
+  screenCanvas.height = SCREEN_H;
+  paintScreen(screenCanvas, 0);
+
+  const phone = createPhone(canvas, { screenCanvas });
+
+  const narrowQ = window.matchMedia("(max-width: 1024px)");
+  function fit() {
+    const r = stage.getBoundingClientRect();
+    // smaller in one column, where the device shares the width with the copy
+    if (r.width && r.height) phone.resize(r.width, r.height, narrowQ.matches ? 1.95 : 1.36);
+  }
+  fit();
+  new ResizeObserver(fit).observe(stage);
+  narrowQ.addEventListener("change", function () { fit(); phone.draw(); });
+
+  let blend = 0;
+  window.__phone3d = {
+    setPose(rx, ry, rz, tx, ty, s) { phone.setPose(rx, ry, rz, tx, ty, s); },
+    setBlend(b) {
+      // repainting the texture is the expensive part, so only when it moves
+      if (Math.abs(b - blend) < 0.015 && b !== 0 && b !== 1) return;
+      if (b === blend) return;
+      blend = b;
+      paintScreen(screenCanvas, b);
+      phone.refreshScreen();
+    },
+    draw() { phone.draw(); },
+    deviceHeight() { return phone.deviceHeight(); }
+  };
+
+  stage.classList.add("is-gl");
+
+  /* Outfit has to be resident before the screen is painted, or the texture
+     bakes in the fallback face and never updates. */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      paintScreen(screenCanvas, blend);
+      phone.refreshScreen();
+      if (window.__rallySnap) window.__rallySnap();
+      phone.draw();
+    });
+  }
+
+  if (window.__rallySnap) window.__rallySnap();
+  phone.draw();
+  if (reduce.matches) { phone.setPose(-4, -22, 0, 0, 0, 1); phone.draw(); }
+} catch (e) {
+  console.warn("3D device unavailable, keeping the CSS build:", e && e.message);
+}
+</script>
 </body>
 </html>
