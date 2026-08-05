@@ -316,6 +316,9 @@ export function createPhone(canvas, opts = {}) {
   const tex = new THREE.CanvasTexture(opts.screenCanvas);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = true;
 
   // black surround, so the gap between glass and rail is not bare titanium
   const bezel = new THREE.Mesh(
@@ -338,7 +341,14 @@ export function createPhone(canvas, opts = {}) {
   }
   scrGeo.setAttribute("uv", new THREE.BufferAttribute(suv, 2));
 
-  const screen = new THREE.Mesh(scrGeo, new THREE.MeshBasicMaterial({ map: tex }));
+  /* toneMapped:false keeps the UI out of the ACES filmic curve. With it on,
+     the whole app screen was pulled toward mid-grey, which is what read as
+     blurry and washed out; a real phone screen is emissive and crisp, so it
+     should not be graded like a lit surface. */
+  const screen = new THREE.Mesh(
+    scrGeo,
+    new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })
+  );
   screen.position.z = D / 2 + 0.02;
   phone.add(screen);
 
@@ -350,10 +360,10 @@ export function createPhone(canvas, opts = {}) {
     new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.055,
+      opacity: 0.03,
       metalness: 0.0,
-      roughness: 0.035,
-      envMapIntensity: 2.6,
+      roughness: 0.06,
+      envMapIntensity: 1.4,
       depthWrite: false
     })
   );

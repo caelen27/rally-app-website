@@ -924,22 +924,30 @@ section { position: relative; }
   justify-content: center;
   padding-block: calc(120 * var(--px));
 }
+/* A three-column grid keeps the device gap dead-centre no matter how wide
+   each headline half is: two equal 1fr columns flank a fixed centre column
+   the width of the device. space-between was jamming the halves to the
+   viewport edges and leaving a lopsided gap to the phone. The halves now hug
+   the device symmetrically, right-aligned on the left and left-aligned on the
+   right, with a consistent breathing gap set by the padding. */
 .thread {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr calc(380 * var(--px)) 1fr;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
-  /* the centre gap is where the device sits */
-  gap: calc(360 * var(--px));
-  /* slightly smaller than the hero so the flanking halves clear the device
-     without running off the viewport edge */
   font-size: calc(132 * var(--px));
   line-height: 0.9;
 }
-.thread__l,
-.thread__r { max-width: calc(560 * var(--px)); }
-.thread__l { text-align: right; }
-.thread__r { text-align: left; }
+.thread__l {
+  grid-column: 1;
+  text-align: right;
+  padding-right: calc(56 * var(--px));
+}
+.thread__r {
+  grid-column: 3;
+  text-align: left;
+  padding-left: calc(56 * var(--px));
+}
 /* the supporting line sits under the right half, clear of the device */
 .thread__lede {
   position: absolute;
