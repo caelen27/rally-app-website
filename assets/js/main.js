@@ -50,6 +50,11 @@
 
   var smoothActive = false;
 
+  /* Per-60Hz-frame catch-up fraction. At 0.12 the page took 1.2s to come to
+     rest after the wheel stopped, which reads as lag rather than smoothness.
+     0.22 settles in roughly 400ms and still feels eased. */
+  var SCROLL_LERP = 0.22;
+
   (function initSmoothScroll() {
     if (reduce.matches) return;
     if (!window.matchMedia("(pointer: fine)").matches) return;
@@ -57,15 +62,31 @@
     var target = window.scrollY;
     var current = target;
     var running = false;
+    var lastT = 0;
 
     function maxScroll() {
       return Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     }
 
-    function tick() {
-      current += (target - current) * 0.12;
+    function tick(now) {
+      /* Normalised to elapsed time, not to frames. A fixed per-frame
+         fraction converges twice as fast on a 120Hz display as on a 60Hz
+         one, so the same page feels different on different monitors.
+         The clamp stops a backgrounded tab from resuming with one huge
+         step once rAF starts firing again. */
+      var dt = Math.min(64, now - lastT);
+      lastT = now;
+      var k = 1 - Math.pow(1 - SCROLL_LERP, dt / 16.667);
+
+      current += (target - current) * k;
       if (Math.abs(target - current) < 0.4) { current = target; running = false; }
-      window.scrollTo(0, current);
+
+      /* behavior:"instant" is load-bearing. The stylesheet sets
+         scroll-behavior:smooth for anchor links, and the two-argument
+         scrollTo() honours it, so every frame of this loop was being eased
+         a second time by the browser. The two curves compounded and the
+         page took over a second to come to rest. */
+      window.scrollTo({ top: current, behavior: "instant" });
       if (running) requestAnimationFrame(tick);
     }
 
@@ -81,7 +102,7 @@
       if (e.target.closest && e.target.closest("[data-native-scroll]")) return;
       e.preventDefault();
       target = clamp(target + toPixels(e), 0, maxScroll());
-      if (!running) { running = true; requestAnimationFrame(tick); }
+      if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(tick); }
     }, { passive: false });
 
     // resync whenever something other than the wheel moves the page:
@@ -181,8 +202,17 @@
     scrShift.style.opacity = window01(p, 0.53, 0.60);
   }
 
-  function frame() {
-    eased += (target - eased) * lerpRate();
+  var lastFrameT = 0;
+
+  function frame(now) {
+    var rate = lerpRate();
+    if (rate >= 1) {
+      eased = target;                       // scroller is already smoothing
+    } else {
+      var dt = Math.min(64, now - lastFrameT);
+      eased += (target - eased) * (1 - Math.pow(1 - rate, dt / 16.667));
+    }
+    lastFrameT = now;
     if (Math.abs(target - eased) < 0.0002) eased = target;
     render(eased);
     if (eased !== target) requestAnimationFrame(frame);
@@ -191,7 +221,7 @@
 
   function measure() {
     target = progress();
-    if (!running) { running = true; requestAnimationFrame(frame); }
+    if (!running) { running = true; lastFrameT = performance.now(); requestAnimationFrame(frame); }
   }
 
   // jump straight to the current position with no catch-up sweep: on load,
@@ -318,9 +348,12 @@
 
   var marquee = document.getElementById("marquee");
   if (marquee) {
-    // rendered twice so the -50% translate loops without a visible seam
+    // rendered twice so the -50% translate loops without a visible seam.
+    // Only the first two are eager: the rest are off-screen at load, and
+    // six full-size photographs competing on first paint is a waste.
+    var n = 0;
     for (var pass = 0; pass < 2; pass++) {
-      CAUSES.forEach(function (c) { marquee.appendChild(causeCard(c, pass === 0)); });
+      CAUSES.forEach(function (c) { marquee.appendChild(causeCard(c, n++ < 2)); });
     }
   }
 

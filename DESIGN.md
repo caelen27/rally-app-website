@@ -162,6 +162,20 @@ else moves the page.
 It claims fine pointers only. Touch already has good momentum and hijacking it
 makes a phone feel worse.
 
+**`behavior: "instant"` on the per-frame `scrollTo` is load-bearing.** The
+stylesheet sets `scroll-behavior: smooth` so anchor links glide, and the
+two-argument `scrollTo()` honours it, which meant every frame of the easing
+loop was being eased a second time by the browser. The two curves compounded
+and the page took 1229ms to come to rest after the wheel stopped. Measured,
+not guessed. With the double-smoothing removed and the catch-up raised from
+0.12 to 0.22 it settles in 364ms, and frame pacing is unchanged: p50 16.7ms,
+p95 17.7ms, zero frames over 33ms.
+
+Both easings are normalised to elapsed time rather than to frames. A fixed
+per-frame fraction converges twice as fast on a 120Hz display as on a 60Hz
+one, so the same page would feel different on different monitors. The `dt` is
+clamped to 64ms so a backgrounded tab does not resume with one huge step.
+
 When smooth scroll is active the phone scrub sets its own lerp to 1 and tracks
 scroll exactly, because the scroller is already doing the easing. Easing both
 compounds them and reads as lag. Without smooth scroll (touch, reduced motion)
