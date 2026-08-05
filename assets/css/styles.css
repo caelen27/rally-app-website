@@ -957,6 +957,48 @@ section { position: relative; }
   max-width: calc(520 * var(--px));
 }
 
+/* ---------- Full-bleed parallax band ----------
+   A cinematic scroll moment in flowty's idiom: a full-width image that drifts
+   against the scroll behind a line-revealed headline. The media box is taller
+   than the section and offset, so the image has room to travel without ever
+   exposing an edge. */
+.band {
+  position: relative;
+  height: 86vh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+.band__media { position: absolute; inset: -14% 0; }
+.band__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translate3d(0, var(--band-drift, 0%), 0) scale(1.06);
+  will-change: transform;
+}
+.band__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9,20,13,0.42), rgba(9,20,13,0.30) 40%, rgba(9,20,13,0.66)),
+    radial-gradient(120% 90% at 50% 50%, rgba(9,20,13,0.10), rgba(9,20,13,0.55));
+}
+.band__inner {
+  position: relative;
+  z-index: 2;
+  padding-inline: calc(64 * var(--px));
+  max-width: calc(1200 * var(--px));
+}
+.band__eyebrow { color: rgba(250,247,240,0.72); }
+.band__h { color: #faf7f0; }
+.band__lede {
+  color: rgba(250,247,240,0.86);
+  margin: calc(28 * var(--px)) auto 0;
+  max-width: calc(560 * var(--px));
+}
+
 .hero-actions {
   display: flex;
   align-items: center;

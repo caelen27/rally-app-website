@@ -508,6 +508,29 @@
     drift();
   }
 
+  /* Same parallax on the full-bleed band image: it drifts against the scroll
+     the whole time the band is on screen. rAF-coalesced, one rect per frame. */
+  var band = document.querySelector(".band__img");
+  if (band && !reduce.matches) {
+    var bandRunning = false;
+    var bandFrame = function () {
+      var r = band.getBoundingClientRect();
+      if (r.bottom > -200 && r.top < innerHeight + 200) {
+        var mid = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+        band.style.setProperty("--band-drift", (mid * -7).toFixed(2) + "%");
+      }
+      bandRunning = false;
+    };
+    var bandDrift = function () {
+      if (bandRunning) return;
+      bandRunning = true;
+      requestAnimationFrame(bandFrame);
+    };
+    addEventListener("scroll", bandDrift, { passive: true });
+    addEventListener("resize", bandDrift);
+    bandDrift();
+  }
+
   /* =========================================================================
      4. Odometer
      ========================================================================= */
