@@ -595,6 +595,18 @@ section { position: relative; }
 .nub--vol2 { top: 34%; height: calc(48 * var(--px)); }
 .side--r .nub { right: calc(-2 * var(--px)); width: calc(var(--pd) + 4 * var(--px)); top: 27%; height: calc(74 * var(--px)); }
 
+/* Line-reveal masks. Each line of a display heading rises out of its own
+   clipped box, staggered by 90ms. The mask has to be a block so it clips the
+   full line box; an inline wrapper leaves descenders showing above it. */
+.line-mask { display: block; overflow: hidden; padding-bottom: 0.04em; }
+.line-mask > i {
+  display: block;
+  font-style: normal;
+  transform: translateY(106%);
+  transition: transform 0.9s var(--ease);
+}
+[data-lines].in .line-mask > i { transform: none; }
+
 /* The WebGL surface. Hidden until phone3d.js confirms it initialised, so a
    browser without WebGL shows the CSS device rather than an empty canvas. */
 .stage-gl {
@@ -1033,6 +1045,9 @@ section { position: relative; }
   /* pulled toward the card's tint so six photos from six photographers still
      read as one set rather than a stock-photo grab bag */
   filter: saturate(0.72) contrast(1.04);
+  /* Parallax, driven by --drift on the strip from main.js. The scale gives
+     the photo room to move inside its frame without exposing an edge. */
+  transform: translate3d(0, var(--drift, 0%), 0) scale(1.1);
 }
 .cause::after {
   content: "";

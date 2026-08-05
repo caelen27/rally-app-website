@@ -417,7 +417,47 @@
      3. Reveal on scroll
      ========================================================================= */
 
-  var revealables = document.querySelectorAll("[data-reveal]");
+  /* Line-reveal masks. Each <br>-separated line of a display heading gets an
+     overflow-hidden wrapper and rises into it, staggered. This is the one
+     motion the original leans on hardest and the only thing here that was
+     missing outright: a plain fade on the whole block reads as a slide deck
+     by comparison. Headings are authored with explicit <br>, so the split is
+     exact rather than a guess at where the browser wrapped. */
+  function maskLines(h) {
+    if (h.querySelector(".line-mask")) return;
+    var groups = [[]], n;
+    for (n = h.firstChild; n; n = n.nextSibling) {
+      if (n.nodeName === "BR") groups.push([]);
+      else groups[groups.length - 1].push(n);
+    }
+    if (groups.length < 2) return;
+    var frag = document.createDocumentFragment();
+    groups.forEach(function (nodes, i) {
+      var mask = document.createElement("span");
+      mask.className = "line-mask";
+      var inner = document.createElement("i");
+      inner.style.transitionDelay = (i * 90) + "ms";
+      nodes.forEach(function (x) { inner.appendChild(x); });
+      mask.appendChild(inner);
+      frag.appendChild(mask);
+    });
+    h.textContent = "";
+    h.appendChild(frag);
+    h.setAttribute("data-lines", "");
+  }
+
+  if (!reduce.matches) {
+    document.querySelectorAll(".display, .display--md").forEach(maskLines);
+  }
+
+  // the cards in a grid should arrive in sequence, not all on the same frame
+  document.querySelectorAll(".steps__grid, .faq__grid").forEach(function (g) {
+    [].forEach.call(g.children, function (c, i) {
+      if (c.hasAttribute("data-reveal")) c.style.transitionDelay = (i * 90) + "ms";
+    });
+  });
+
+  var revealables = document.querySelectorAll("[data-reveal], [data-lines]");
 
   if (reduce.matches || !("IntersectionObserver" in window)) {
     revealables.forEach(function (n) { n.classList.add("in"); });
@@ -428,6 +468,34 @@
       });
     }, { rootMargin: "0px 0px -12% 0px", threshold: 0.08 });
     revealables.forEach(function (n) { revealer.observe(n); });
+  }
+
+  /* Continuous parallax on the photography. The original drifts its section
+     imagery against the scroll the whole time it is on screen, which is what
+     keeps the lower half alive once the pinned device has gone. Every card in
+     the strip shares a vertical position, so this reads one rect and writes
+     one inherited custom property per frame rather than touching a dozen
+     elements, and it is rAF-coalesced so a burst of scroll events collapses
+     into a single measurement. */
+  var strip = document.getElementById("marquee");
+  if (strip && !reduce.matches) {
+    var pxRunning = false;
+    var driftFrame = function () {
+      var r = strip.getBoundingClientRect();
+      if (r.bottom > -200 && r.top < innerHeight + 200) {
+        var mid = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+        strip.style.setProperty("--drift", (mid * -9).toFixed(2) + "%");
+      }
+      pxRunning = false;
+    };
+    var drift = function () {
+      if (pxRunning) return;
+      pxRunning = true;
+      requestAnimationFrame(driftFrame);
+    };
+    addEventListener("scroll", drift, { passive: true });
+    addEventListener("resize", drift);
+    drift();
   }
 
   /* =========================================================================
