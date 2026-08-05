@@ -27,11 +27,14 @@
   --line: rgba(28, 25, 23, 0.12);
   --line-soft: rgba(28, 25, 23, 0.07);
 
-  /* Phone geometry */
+  /* Phone geometry. Ratios taken from a 16 Pro: 71.5 x 149.6 x 8.25mm gives
+     h/w 2.09 and d/w 0.115, so the body reads as the real proportion. */
   --pw: calc(330 * var(--px));
-  --ph: calc(680 * var(--px));
-  --pd: calc(28 * var(--px));
-  --pr: calc(48 * var(--px));
+  --ph: calc(690 * var(--px));
+  --pd: calc(38 * var(--px));
+  --pr: calc(50 * var(--px));
+  --cw: calc(134 * var(--px));  /* camera plateau, 40% of body width */
+  --cd: calc(9 * var(--px));    /* how far the bump stands off the back */
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -327,152 +330,188 @@ section { position: relative; }
   margin: calc(var(--ph) / -2) 0 0 calc(var(--pw) / -2);
 }
 
+/* Black titanium. The reference device is very dark: the brightest point on
+   the entire body barely clears #5d. Earlier revisions used near-chrome rails
+   and the whole thing read as cheap plastic, so keep the range low. */
 .face--front {
   transform: translateZ(calc(var(--pd) / 2));
-  background:
-    linear-gradient(155deg, #6a7078 0%, #3d434a 14%, #23262b 40%, #191c20 70%, #2e343b 100%);
-  padding: calc(6 * var(--px));
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    inset 0 0 calc(3 * var(--px)) rgba(255, 255, 255, 0.1);
+  background: linear-gradient(152deg, #34383e 0%, #24272c 18%, #191b1f 55%, #202329 100%);
+  padding: calc(5 * var(--px));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.13);
 }
 
+/* preserve-3d, and deliberately NOT overflow:hidden — an overflow clip forces
+   a flat rendering context, which would collapse the camera bump back into
+   the panel and undo the whole point of it. */
 .face--back {
   transform: rotateY(180deg) translateZ(calc(var(--pd) / 2));
+  transform-style: preserve-3d;
   background:
-    /* soft studio key light off the top-left shoulder */
-    radial-gradient(120% 90% at 18% 8%, rgba(255, 255, 255, 0.13), transparent 52%),
-    /* cooler bounce along the bottom edge */
-    radial-gradient(90% 60% at 82% 100%, rgba(150, 175, 200, 0.09), transparent 60%),
-    linear-gradient(158deg, #5f666e 0%, #363c43 12%, #22262b 38%, #1a1d21 68%, #2b3138 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    inset 0 0 calc(3 * var(--px)) rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+    radial-gradient(120% 80% at 24% 10%, rgba(255, 255, 255, 0.05), transparent 55%),
+    linear-gradient(158deg, #2b2e34 0%, #1e2126 16%, #15171a 52%, #1b1e22 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
-
-/* a single raking highlight sweeping the glass back */
 .face--back::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(118deg,
-    transparent 28%,
-    rgba(255, 255, 255, 0.055) 44%,
-    rgba(255, 255, 255, 0.1) 49%,
-    rgba(255, 255, 255, 0.04) 55%,
-    transparent 70%);
+  border-radius: inherit;
+  background: linear-gradient(118deg, transparent 34%, rgba(255, 255, 255, 0.035) 49%, transparent 64%);
 }
 
-/* camera plateau: a raised squircle with its own rim light */
+/* ---------- camera bump ----------
+   A real box, not a flat decal: the plateau is pushed out along the back
+   face's local +Z and four side walls span the gap back to the panel. That
+   silhouette is what keeps the edge-on frame of the tumble readable. */
+
 .camera {
   position: absolute;
-  top: calc(24 * var(--px));
-  left: calc(24 * var(--px));
-  width: calc(132 * var(--px));
-  height: calc(132 * var(--px));
-  border-radius: calc(40 * var(--px));
+  top: calc(27 * var(--px));
+  left: calc(27 * var(--px));
+  width: var(--cw);
+  height: var(--cw);
+  border-radius: calc(44 * var(--px));
+  transform: translateZ(var(--cd));
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
   background:
-    radial-gradient(110% 90% at 22% 12%, rgba(255, 255, 255, 0.14), transparent 55%),
-    linear-gradient(152deg, #454b53, #2b3037 45%, #1d2126);
+    radial-gradient(115% 90% at 24% 14%, rgba(255, 255, 255, 0.09), transparent 58%),
+    linear-gradient(152deg, #33373d, #23262b 46%, #1a1d21);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    0 calc(4 * var(--px)) calc(14 * var(--px)) rgba(0, 0, 0, 0.5),
-    0 calc(1 * var(--px)) calc(2 * var(--px)) rgba(0, 0, 0, 0.6);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 calc(5 * var(--px)) calc(16 * var(--px)) rgba(0, 0, 0, 0.55);
 }
 
+/* Walls sit in the bump's own shadow, so they read darker than both the
+   plateau above them and the panel they rise from. Lighter than this and the
+   bump looks like a grey wedge stuck on rather than machined into the body. */
+.cam-wall {
+  position: absolute;
+  background: linear-gradient(180deg, #16191d, #0b0d10);
+}
+.cam-wall--l {
+  width: var(--cd); height: 100%;
+  top: 0; left: 0;
+  transform-origin: 0 50%;
+  transform: rotateY(90deg);
+}
+.cam-wall--r {
+  width: var(--cd); height: 100%;
+  top: 0; right: 0;
+  transform-origin: 100% 50%;
+  transform: rotateY(-90deg);
+}
+.cam-wall--t {
+  width: 100%; height: var(--cd);
+  top: 0; left: 0;
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+}
+.cam-wall--b {
+  width: 100%; height: var(--cd);
+  bottom: 0; left: 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(90deg);
+}
+
+/* Lens triangle: two down the left, one on the right slightly lower, which
+   is the actual Pro arrangement. Flash sits top-right outside the triangle,
+   LiDAR bottom-right. */
 .lens {
   position: absolute;
   width: calc(46 * var(--px));
   height: calc(46 * var(--px));
   border-radius: 50%;
-  /* metal bezel ring, then the glass well sunk inside it */
   background:
     radial-gradient(circle at 50% 50%,
-      #05070a 0 34%,
-      #0d1114 40%,
-      #2b3138 47%,
-      #59606a 51%,
-      #343a42 56%,
-      #23282e 100%);
+      #04060a 0 33%,
+      #0b0f13 39%,
+      #262b31 46%,
+      #545b64 50%,
+      #30353c 55%,
+      #202429 100%);
   box-shadow:
-    0 calc(1 * var(--px)) calc(3 * var(--px)) rgba(0, 0, 0, 0.7),
-    inset 0 calc(1 * var(--px)) calc(1 * var(--px)) rgba(255, 255, 255, 0.16);
+    0 calc(1 * var(--px)) calc(4 * var(--px)) rgba(0, 0, 0, 0.75),
+    inset 0 calc(1 * var(--px)) calc(1 * var(--px)) rgba(255, 255, 255, 0.14);
 }
-/* blue-green coating flare */
+/* coating flare */
 .lens::before {
   content: "";
   position: absolute;
-  inset: 26%;
+  inset: 28%;
   border-radius: 50%;
-  background: radial-gradient(circle at 62% 68%, rgba(70, 130, 160, 0.5), rgba(20, 60, 80, 0.15) 60%, transparent 75%);
+  background: radial-gradient(circle at 64% 70%, rgba(56, 104, 132, 0.45), rgba(14, 44, 60, 0.14) 58%, transparent 76%);
 }
-/* hard specular pin */
+/* specular pin */
 .lens::after {
   content: "";
   position: absolute;
-  top: 27%; left: 27%;
-  width: 20%; height: 15%;
+  top: 29%; left: 28%;
+  width: 17%; height: 13%;
   border-radius: 50%;
-  background: rgba(226, 240, 255, 0.75);
-  filter: blur(calc(0.8 * var(--px)));
+  background: rgba(214, 232, 250, 0.7);
+  filter: blur(calc(0.7 * var(--px)));
 }
-.lens--1 { top: calc(11 * var(--px)); left: calc(11 * var(--px)); }
-.lens--2 { top: calc(11 * var(--px)); right: calc(11 * var(--px)); }
-.lens--3 { bottom: calc(11 * var(--px)); left: calc(11 * var(--px)); }
+.lens--1 { top: calc(12 * var(--px)); left: calc(12 * var(--px)); }
+.lens--2 { bottom: calc(12 * var(--px)); left: calc(12 * var(--px)); }
+.lens--3 { top: calc(44 * var(--px)); right: calc(10 * var(--px)); }
 
 .flash {
   position: absolute;
-  bottom: calc(26 * var(--px));
-  right: calc(30 * var(--px));
-  width: calc(19 * var(--px));
-  height: calc(19 * var(--px));
+  top: calc(14 * var(--px));
+  right: calc(20 * var(--px));
+  width: calc(17 * var(--px));
+  height: calc(17 * var(--px));
   border-radius: 50%;
-  background: radial-gradient(circle at 42% 38%, #fffdf4 0 26%, #d9d2bd 48%, #6d6759 82%, #3a3730 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  background: radial-gradient(circle at 42% 36%, #fffdf2 0 24%, #d8d0b8 46%, #6a6456 80%, #33302a 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
-/* lidar dot, the detail that sells it as a Pro */
-.flash::after {
-  content: "";
+.lidar {
   position: absolute;
-  right: calc(-2 * var(--px));
-  top: calc(-30 * var(--px));
+  bottom: calc(20 * var(--px));
+  right: calc(22 * var(--px));
   width: calc(15 * var(--px));
   height: calc(15 * var(--px));
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 36%, #3b4149 0 30%, #16191d 70%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.13);
+  background: radial-gradient(circle at 40% 36%, #2d323a 0 30%, #101216 72%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
+/* Flowty's render carries an Apple logo here. Rally's own mark goes on
+   instead: putting Apple's trademark on our marketing implies an
+   endorsement that does not exist. */
 .badge-back {
   position: absolute;
   left: 50%;
-  top: 54%;
+  top: 52%;
   transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.1);
   font-size: calc(34 * var(--px));
   letter-spacing: -0.03em;
 }
 
-/* Side rails. Capped with a pill radius so their ends tuck into the rounded
-   corners of the front and back faces instead of poking out as square steps. */
-/* Polished titanium. The stop sequence reads as a rounded edge catching light
-   at its crown rather than a flat grey stripe. */
+/* ---------- rails ---------- */
+
+/* preserve-3d so the buttons can stand proud of the rail face.
+   backface-visibility matters as much: without it the far rail keeps
+   rendering and, once the body turns past 90 degrees, perspective throws it
+   clear of the silhouette as a detached floating bar. */
 .side {
   position: absolute;
   top: 50%;
   left: 50%;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
   background: linear-gradient(90deg,
-    #14171a 0%,
-    #3c424a 12%,
-    #7d848d 30%,
-    #aeb5bd 44%,
-    #cfd5db 50%,
-    #9ba2ab 58%,
-    #5d646d 76%,
-    #2a2f35 92%,
-    #14171a 100%);
+    #0f1115 0%,
+    #262a30 15%,
+    #454a52 34%,
+    #5d636c 50%,
+    #414750 66%,
+    #22262c 85%,
+    #0e1014 100%);
 }
+
 .side--l,
 .side--r {
   width: var(--pd);
@@ -482,6 +521,7 @@ section { position: relative; }
 }
 .side--l { transform: rotateY(-90deg) translateZ(calc(var(--pw) / 2)); }
 .side--r { transform: rotateY(90deg) translateZ(calc(var(--pw) / 2)); }
+
 .side--t,
 .side--b {
   width: calc(var(--pw) - var(--pr) * 1.8);
@@ -489,30 +529,35 @@ section { position: relative; }
   margin: calc(var(--pd) / -2) 0 0 calc((var(--pw) - var(--pr) * 1.8) / -2);
   border-radius: calc(var(--pd) / 2);
   background: linear-gradient(180deg,
-    #14171a 0%, #3c424a 12%, #7d848d 30%, #aeb5bd 44%,
-    #cfd5db 50%, #9ba2ab 58%, #5d646d 76%, #2a2f35 92%, #14171a 100%);
+    #0f1115 0%, #262a30 15%, #454a52 34%, #5d636c 50%,
+    #414750 66%, #22262c 85%, #0e1014 100%);
 }
 .side--t { transform: rotateX(90deg) translateZ(calc(var(--ph) / 2)); }
 .side--b { transform: rotateX(-90deg) translateZ(calc(var(--ph) / 2)); }
 
+/* Buttons stand off the rail by a couple of px. In profile they break the
+   straight edge, which is most of what sells the side view. */
 .nub {
   position: absolute;
   border-radius: calc(3 * var(--px));
-  background: linear-gradient(90deg, #2a2f35 0%, #8b929b 35%, #c3c9d0 50%, #767d86 68%, #23282e 100%);
-  box-shadow: 0 0 calc(2 * var(--px)) rgba(0, 0, 0, 0.4);
+  background: linear-gradient(90deg, #16191d 0%, #454a53 32%, #666d77 52%, #383d45 74%, #14171b 100%);
+  backface-visibility: hidden;
+  transform: translateZ(calc(2.5 * var(--px)));
+  box-shadow: 0 0 calc(3 * var(--px)) rgba(0, 0, 0, 0.55);
 }
 .side--l .nub { left: calc(-2 * var(--px)); width: calc(var(--pd) + 4 * var(--px)); }
-.nub--vol1 { top: 22%; height: calc(46 * var(--px)); }
-.nub--vol2 { top: 32%; height: calc(46 * var(--px)); }
-.side--r .nub { right: calc(-2 * var(--px)); width: calc(var(--pd) + 4 * var(--px)); top: 26%; height: calc(72 * var(--px)); }
+.nub--action { top: 15%; height: calc(30 * var(--px)); }
+.nub--vol1 { top: 24%; height: calc(48 * var(--px)); }
+.nub--vol2 { top: 34%; height: calc(48 * var(--px)); }
+.side--r .nub { right: calc(-2 * var(--px)); width: calc(var(--pd) + 4 * var(--px)); top: 27%; height: calc(74 * var(--px)); }
 
-/* ---------- Screen ---------- */
+/* ---------- screen ---------- */
 
 .screen {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: calc(var(--pr) - 6 * var(--px));
+  border-radius: calc(var(--pr) - 5 * var(--px));
   overflow: hidden;
   background: #0a0a0b;
   color: #e9e9ef;
@@ -532,16 +577,28 @@ section { position: relative; }
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-.notch {
+/* Dynamic Island, not a notch. The reference is a current Pro. */
+.island {
   position: absolute;
-  top: calc(14 * var(--px));
+  top: calc(13 * var(--px));
   left: 50%;
   transform: translateX(-50%);
-  width: calc(104 * var(--px));
+  width: calc(98 * var(--px));
   height: calc(30 * var(--px));
   border-radius: calc(999 * var(--px));
   background: #000;
   z-index: 6;
+}
+.island::after {
+  content: "";
+  position: absolute;
+  right: calc(8 * var(--px));
+  top: 50%;
+  transform: translateY(-50%);
+  width: calc(12 * var(--px));
+  height: calc(12 * var(--px));
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #1d2a3a 0 38%, #080b0f 76%);
 }
 
 .scr {
@@ -560,13 +617,27 @@ section { position: relative; }
     radial-gradient(120% 80% at 20% 0%, rgba(31, 107, 60, 0.5), transparent 60%),
     #0a0a0b;
 }
+/* Pinned level with the Dynamic Island rather than sitting under it, which
+   is where iOS actually puts it. */
 .scr__status {
+  position: absolute;
+  top: calc(19 * var(--px));
+  left: calc(30 * var(--px));
+  right: calc(28 * var(--px));
+  z-index: 7;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: calc(13 * var(--px));
-  color: rgba(233, 233, 239, 0.75);
-  margin-bottom: calc(8 * var(--px));
+  font-size: calc(14 * var(--px));
+  font-weight: 500;
+  color: #e9e9ef;
 }
+.scr__status svg {
+  height: calc(13 * var(--px));
+  width: auto;
+  opacity: 0.95;
+}
+.scr__icons { display: flex; align-items: center; gap: calc(5 * var(--px)); }
 .scr__hello {
   font-size: calc(26 * var(--px));
   line-height: 1.1;
@@ -1197,15 +1268,61 @@ details p {
 @media (max-width: 1024px) {
   :root {
     --px: calc(100vw / 1180);
-    --pw: calc(300 * var(--px));
-    --ph: calc(620 * var(--px));
+    --pw: calc(268 * var(--px));
+    --ph: calc(560 * var(--px));
+    --pd: calc(31 * var(--px));
+    --pr: calc(41 * var(--px));
+    --cw: calc(109 * var(--px));
+    --cd: calc(7.5 * var(--px));
   }
+  /* The desktop display sizes assume a wide viewport. Carried into the
+     tablet band unchanged, the h1 wrapped to four lines and pushed the lede
+     and both buttons below the fold on a 1024 by 768 iPad in landscape. */
+  .display     { font-size: calc(104 * var(--px)); }
+  .display--xl { font-size: calc(164 * var(--px)); }
+  .display--md { font-size: calc(72 * var(--px)); }
+  .title-sm    { font-size: calc(40 * var(--px)); }
+
   .matcher__grid,
   .orgs__grid,
   .faq__grid { grid-template-columns: 1fr; gap: calc(70 * var(--px)); }
   .features__grid { grid-template-columns: 1fr; }
   .steps__grid { grid-template-columns: 1fr; }
   .masthead nav a:not(.btn) { display: none; }
+
+  /* Single column from here down, so the pinned stage is retired.
+
+     A phone pinned at the viewport centre and full-height text chapters in
+     one column always intersect: as you scroll, every block of copy passes
+     through the centre, and there is no sideways room to move the device
+     into. flowty.co has the same collision but hides it, being dark type on
+     a dark page. On cream it is glaring.
+
+     So the stage rejoins the flow and takes a slot of its own between the
+     hero and the second chapter. display:contents on .chapters promotes the
+     individual chapters to flex items so the stage can be ordered between
+     them. The tumble is kept: it is driven off the stage's own travel
+     through the viewport instead of scroll position along the track. */
+  .track { display: flex; flex-direction: column; }
+  .chapters { display: contents; }
+  .chapter:nth-child(1) { order: 1; }
+  .stage-wrap { order: 2; }
+  .chapter:nth-child(2) { order: 3; }
+  .chapter:nth-child(3) { order: 4; }
+
+  .stage-wrap {
+    position: relative;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-height: 76vh;
+  }
+  .stage { perspective-origin: 50% 50%; }
+  .chapter {
+    min-height: 0;
+    padding-top: calc(120 * var(--px));
+    padding-bottom: calc(120 * var(--px));
+  }
+  .chapter:nth-child(1) { padding-top: calc(210 * var(--px)); padding-bottom: calc(40 * var(--px)); }
 }
 
 @media (max-width: 720px) {

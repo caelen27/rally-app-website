@@ -79,10 +79,33 @@ between major blocks, `70 to 80` between a heading and its content.
 
 ## The pinned phone
 
-A real CSS 3D object, not an image or a video: six faces under
-`transform-style: preserve-3d`, with the screen rendered as live HTML so it
-stays crisp and themeable. The original uses a Spline WebGL scene, which is
-their asset and was not copied.
+A real CSS 3D object, not an image or a video: six body faces under
+`transform-style: preserve-3d`, plus a camera bump built as its own box with
+four side walls, with the screen rendered as live HTML so it stays crisp and
+themeable. The original uses a Spline WebGL scene, which is their asset and
+was not copied.
+
+Modelled on a black-titanium Pro. Three things carry the likeness, and all
+three were wrong in the first attempt:
+
+- **Value range.** The reference body is near-black; its brightest point
+  barely clears `#5d`. The first pass used near-chrome rails peaking at
+  `#cfd5db` and the whole thing read as cheap plastic. Keep the range low.
+- **Camera bump depth.** The plateau is pushed out along the back face's
+  local +Z with walls spanning back to the panel. This is what makes the
+  edge-on frame legible: you see lens barrels in profile rather than a flat
+  slab. It requires the back face to be `preserve-3d` and **not**
+  `overflow: hidden`, since an overflow clip forces a flat rendering context
+  and collapses the bump into the panel.
+- **Buttons that protrude.** `translateZ` on the nubs, which needs
+  `preserve-3d` on the rail.
+
+Both the rails and the nubs need `backface-visibility: hidden`. Without it
+the far rail keeps painting, and once the body turns past 90 degrees
+perspective throws it clear of the silhouette as a detached floating bar.
+
+Dynamic Island, not a notch, and the status bar is pinned level with it
+rather than sitting underneath.
 
 Its pose is scrubbed from scroll progress through the `.track` section by a
 keyframe table in `main.js` (`ARC`), sampled with smootherstep. The phone
@@ -104,9 +127,29 @@ Two things that will break if touched carelessly:
   deliberately wider than its container, and overflowing grid items align to
   start rather than centre.
 
-Narrow viewports use a separate arc that keeps the phone centred in the band
-between headline and call to action, because the desktop arc puts it straight
-through the body copy.
+## Responsive strategy for the stage
+
+Three bands, and the middle one is the one that bites.
+
+**Above 1024** the stage is pinned and the phone tracks an arc that offsets it
+25 percent to the right, keeping the left column of copy clear.
+
+**At 1024 and below** the pinned stage is retired entirely. A phone pinned at
+the viewport centre and full-height text chapters in a single column always
+intersect: every block of copy passes through the centre as it scrolls, and
+there is no sideways room left to move the device into. flowty.co has exactly
+the same collision and gets away with it, being light type on a dark page; on
+cream it is glaring.
+
+So the stage rejoins the flow and takes a slot of its own between the hero and
+the second chapter. `display: contents` on `.chapters` promotes the individual
+chapters to flex items so the stage can be `order`ed between them. The tumble
+survives: `progress()` switches to measuring the stage's own travel through
+the viewport instead of scroll position along the track.
+
+The desktop display sizes also need stepping down here, or the h1 wraps to
+four lines and pushes the lede and both buttons below the fold on a 1024 by
+768 iPad in landscape.
 
 ## Smooth scroll
 

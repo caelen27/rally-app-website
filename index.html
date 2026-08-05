@@ -62,11 +62,18 @@
         <!-- front -->
         <div class="face face--front">
           <div class="screen">
-            <div class="notch"></div>
+            <div class="island"></div>
 
             <!-- portrait: this week -->
             <div class="scr scr--home" id="scrHome">
-              <div class="scr__status"><span>9:41</span><span>Scarborough</span></div>
+              <div class="scr__status">
+                <span>9:41</span>
+                <span class="scr__icons">
+                  <svg viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                  <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M1 4.2a10 10 0 0 1 14 0"/><path d="M3.6 7a6.4 6.4 0 0 1 8.8 0"/><circle cx="8" cy="10.2" r="1.1" fill="currentColor" stroke="none"/></svg>
+                  <svg viewBox="0 0 26 12" fill="none" aria-hidden="true"><rect x="0.6" y="0.6" width="21" height="10.8" rx="3" stroke="currentColor" stroke-opacity="0.5" stroke-width="1.2"/><rect x="2.2" y="2.2" width="15" height="7.6" rx="1.8" fill="currentColor"/><path d="M23.4 4.2v3.6a2.6 2.6 0 0 0 0-3.6z" fill="currentColor" fill-opacity="0.5"/></svg>
+                </span>
+              </div>
               <p class="scr__hello">This week, Amara.<br><span>Two shifts booked, 1 open near you.</span></p>
 
               <div class="mini-card">
@@ -115,16 +122,25 @@
         <!-- back -->
         <div class="face face--back">
           <div class="camera">
+            <span class="cam-wall cam-wall--l"></span>
+            <span class="cam-wall cam-wall--r"></span>
+            <span class="cam-wall cam-wall--t"></span>
+            <span class="cam-wall cam-wall--b"></span>
             <span class="lens lens--1"></span>
             <span class="lens lens--2"></span>
             <span class="lens lens--3"></span>
             <span class="flash"></span>
+            <span class="lidar"></span>
           </div>
           <span class="badge-back">Rally</span>
         </div>
 
         <!-- edges -->
-        <div class="side side--l"><span class="nub nub--vol1"></span><span class="nub nub--vol2"></span></div>
+        <div class="side side--l">
+          <span class="nub nub--action"></span>
+          <span class="nub nub--vol1"></span>
+          <span class="nub nub--vol2"></span>
+        </div>
         <div class="side side--r"><span class="nub"></span></div>
         <div class="side side--t"></div>
         <div class="side side--b"></div>

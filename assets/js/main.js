@@ -108,23 +108,37 @@
      for most of the scroll. rotateY still completes a full turn, but the
      back-facing stretch is compressed into a fast sweep around p 0.4 to 0.55
      instead of being held. Ends in landscape at rotateZ -90. */
+  /* The keyframes bracketing each perpendicular (0.36/0.42 around -90, and
+     0.62/0.68 around -270) sit close together on purpose. Smootherstep eases
+     to a stop at every segment boundary, so a keyframe near 90 degrees parks
+     the phone exactly edge-on, where it reads as a grey slab. Bracketing it
+     tightly means the body is only within ten degrees of perpendicular for
+     about two percent of the scroll. rx also stays a few degrees off zero
+     throughout, so a rail and the camera bump are always catching light. */
   var ARC = [
-    { p: 0.00, rx:  8, ry:  -18, rz:   0, tx: 18, ty: 68, s: 0.94 },
-    { p: 0.20, rx:  5, ry:  -34, rz:  -3, tx: 22, ty:  4, s: 1.00 },
-    { p: 0.38, rx:  3, ry:  -60, rz:  -5, tx: 24, ty: -2, s: 1.03 },
-    { p: 0.48, rx:  1, ry: -180, rz:  -8, tx: 22, ty: -2, s: 1.03 },
-    { p: 0.58, rx: -1, ry: -300, rz: -12, tx: 18, ty:  0, s: 1.02 },
-    { p: 0.78, rx: -3, ry: -348, rz: -34, tx: 10, ty:  3, s: 1.04 },
-    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty: 10, s: 1.12 }
+    { p: 0.00, rx:  9, ry:  -20, rz:   1, tx: 19, ty: 70, s: 1.02 },
+    { p: 0.20, rx:  6, ry:  -38, rz:  -2, tx: 23, ty:  6, s: 1.10 },
+    { p: 0.36, rx:  5, ry:  -66, rz:  -5, tx: 25, ty: -1, s: 1.13 },
+    { p: 0.42, rx:  7, ry: -114, rz:  -6, tx: 25, ty: -1, s: 1.13 },
+    { p: 0.52, rx:  3, ry: -186, rz:  -9, tx: 22, ty: -2, s: 1.12 },
+    { p: 0.62, rx:  6, ry: -252, rz: -12, tx: 19, ty:  0, s: 1.11 },
+    { p: 0.68, rx:  4, ry: -296, rz: -16, tx: 16, ty:  1, s: 1.11 },
+    { p: 0.82, rx: -2, ry: -344, rz: -40, tx:  9, ty:  3, s: 1.14 },
+    { p: 1.00, rx: -5, ry: -360, rz: -90, tx:  0, ty:  9, s: 1.22 }
   ];
 
-  /* On narrow screens the headline and the CTA block eat both ends of the
-     viewport, so the phone stays centred in the band between them. */
+  /* Once the layout is a single column the headline and the CTA block eat
+     both ends of the viewport, so the phone stays centred in the band
+     between them and never translates.
+
+     This threshold is 1024, not 720. The single-column layout starts at
+     1024, and between the two the desktop arc was sliding the phone 25 to
+     the right straight over the lede on any portrait tablet. */
   var ARC_NARROW = ARC.map(function (k) {
     return { p: k.p, rx: k.rx, ry: k.ry, rz: k.rz, tx: 0, ty: 0, s: 1 };
   });
 
-  var narrowQ = window.matchMedia("(max-width: 720px)");
+  var narrowQ = window.matchMedia("(max-width: 1024px)");
   var arc = narrowQ.matches ? ARC_NARROW : ARC;
 
   var target = 0, eased = 0, running = false;
@@ -135,7 +149,18 @@
      smoothing. Without smooth scroll (touch), the phone eases itself. */
   function lerpRate() { return smoothActive ? 1 : 0.11; }
 
+  var stageWrap = document.querySelector(".stage-wrap");
+
   function progress() {
+    /* Narrow screens do not pin the stage, so track progress would rotate the
+       phone mostly while it is off screen. Drive it from the stage's own
+       travel through the viewport instead: 0 as it enters from the bottom,
+       1 as it leaves past the top. */
+    if (narrowQ.matches && stageWrap) {
+      var s = stageWrap.getBoundingClientRect();
+      var reach = window.innerHeight + s.height;
+      return clamp(reach > 0 ? (window.innerHeight - s.top) / reach : 0, 0, 1);
+    }
     var r = track.getBoundingClientRect();
     var span = track.offsetHeight - window.innerHeight;
     return clamp(span > 0 ? -r.top / span : 0, 0, 1);
@@ -150,9 +175,10 @@
       " rotateZ(" + sample(arc, "rz", p).toFixed(2) + "deg)" +
       " scale(" + sample(arc, "s", p).toFixed(3) + ")";
 
-    // swapped while the phone is showing its back, so the crossfade is unseen
-    scrHome.style.opacity = 1 - window01(p, 0.43, 0.50);
-    scrShift.style.opacity = window01(p, 0.50, 0.57);
+    // swapped inside the back-facing window (roughly p 0.42 to 0.66), so the
+    // crossfade happens behind the device and is never seen
+    scrHome.style.opacity = 1 - window01(p, 0.45, 0.52);
+    scrShift.style.opacity = window01(p, 0.53, 0.60);
   }
 
   function frame() {
