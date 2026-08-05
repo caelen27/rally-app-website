@@ -162,6 +162,91 @@
   var narrowQ = window.matchMedia("(max-width: 1024px)");
   var arc = narrowQ.matches ? ARC_NARROW : ARC;
 
+  /* =======================================================================
+     Solidity: closed corners and a real key light
+
+     Two things made the body read as flat panels stuck together rather than
+     one machined object.
+
+     First, the four vertical corners were open. The rails stop short of them
+     (they have to, or they overshoot the rounded outline) and nothing
+     bridged the gap, so at grazing angles you saw straight through the
+     device. Each corner is now closed with a fan of narrow strips tangent to
+     the corner arc.
+
+     Second, every face carried a fixed gradient no matter which way it
+     pointed. A real object redistributes light as it turns; a sticker does
+     not. Each face's normal is now rotated into world space every frame and
+     dotted with a key light, and the result handed to CSS as --lit.
+     ======================================================================= */
+
+  var LIT = [];
+
+  (function buildBody() {
+    if (!phone) return;
+
+    // the six flat faces, with their outward normals in the phone's own
+    // frame (screen coordinates, so +y points down)
+    [[".face--front", 0, 0, 1], [".face--back", 0, 0, -1],
+     [".side--l", -1, 0, 0], [".side--r", 1, 0, 0],
+     [".side--t", 0, -1, 0], [".side--b", 0, 1, 0]].forEach(function (f) {
+      var el = phone.querySelector(f[0]);
+      if (el) LIT.push({ el: el, n: [f[1], f[2], f[3]] });
+    });
+
+    // corner arcs, walking a quarter turn. Seven strips is where the
+    // faceting stops being visible at the scale the phone is rendered.
+    var SEGS = 7;
+    var step = 90 / SEGS;
+    var frag = document.createDocumentFragment();
+
+    [{ sx: 1, sy: -1, a0: -90 }, { sx: 1, sy: 1, a0: 0 },
+     { sx: -1, sy: 1, a0: 90 }, { sx: -1, sy: -1, a0: 180 }].forEach(function (c) {
+      var cx = c.sx > 0 ? "calc(var(--pw) / 2 - var(--pr))" : "calc(var(--pr) - var(--pw) / 2)";
+      var cy = c.sy > 0 ? "calc(var(--ph) / 2 - var(--pr))" : "calc(var(--pr) - var(--ph) / 2)";
+
+      for (var i = 0; i < SEGS; i++) {
+        var a = c.a0 + (i + 0.5) * step;
+        var rad = a * Math.PI / 180;
+        var cos = Math.cos(rad).toFixed(5), sin = Math.sin(rad).toFixed(5);
+
+        var seg = document.createElement("i");
+        seg.className = "corner";
+        seg.style.transform =
+          "translate(-50%,-50%)" +
+          " translate3d(calc(" + cx + " + var(--pr) * " + cos + ")," +
+                       "calc(" + cy + " + var(--pr) * " + sin + "),0)" +
+          " rotateZ(" + a.toFixed(3) + "deg) rotateY(90deg)";
+        // 1.08 so neighbouring strips overlap slightly and leave no seam
+        seg.style.height = "calc(var(--pr) * " + (step * Math.PI / 180 * 1.08).toFixed(5) + ")";
+        frag.appendChild(seg);
+
+        LIT.push({ el: seg, n: [Math.cos(rad), Math.sin(rad), 0] });
+      }
+    });
+    phone.appendChild(frag);
+  })();
+
+  // key light: high, to the left, and in front of the device
+  var LX = -0.42, LY = -0.66, LZ = 0.62;
+
+  function applyLight(rx, ry, rz) {
+    var X = rx * Math.PI / 180, Y = ry * Math.PI / 180, Z = rz * Math.PI / 180;
+    var cx = Math.cos(X), sx = Math.sin(X);
+    var cy = Math.cos(Y), sy = Math.sin(Y);
+    var cz = Math.cos(Z), sz = Math.sin(Z);
+
+    for (var i = 0; i < LIT.length; i++) {
+      var n = LIT[i].n;
+      // same order the transform applies them: Z, then Y, then X
+      var x1 = n[0] * cz - n[1] * sz, y1 = n[0] * sz + n[1] * cz, z1 = n[2];
+      var x2 = x1 * cy + z1 * sy, z2 = -x1 * sy + z1 * cy;
+      var y3 = y1 * cx - z2 * sx, z3 = y1 * sx + z2 * cx;
+      var d = x2 * LX + y3 * LY + z3 * LZ;
+      LIT[i].el.style.setProperty("--lit", (d < 0 ? 0 : d).toFixed(3));
+    }
+  }
+
   var target = 0, eased = 0, running = false;
 
   /* The scrub always tracks scroll position exactly.
@@ -174,31 +259,82 @@
      one to one and let the platform own the smoothing. */
   function lerpRate() { return 1; }
 
-  var stageWrap = document.querySelector(".stage-wrap");
-
   function progress() {
-    /* Narrow screens do not pin the stage, so track progress would rotate the
-       phone mostly while it is off screen. Drive it from the stage's own
-       travel through the viewport instead: 0 as it enters from the bottom,
-       1 as it leaves past the top. */
-    if (narrowQ.matches && stageWrap) {
-      var s = stageWrap.getBoundingClientRect();
-      var reach = window.innerHeight + s.height;
-      return clamp(reach > 0 ? (window.innerHeight - s.top) / reach : 0, 0, 1);
-    }
     var r = track.getBoundingClientRect();
     var span = track.offsetHeight - window.innerHeight;
     return clamp(span > 0 ? -r.top / span : 0, 0, 1);
   }
 
+  /* ---- backdrop fade ----
+     In one column the pinned device and the copy share the same space, so
+     text does cross it between sections. Measuring the overlap and fading
+     the device back turns what would read as a collision into a deliberate
+     backdrop.
+
+     Positions are cached rather than measured per frame: reading a rect
+     straight after writing the phone's transform forces a synchronous
+     reflow on every single frame of the scroll. The phone sits at the
+     viewport centre while pinned, so its band is arithmetic. */
+  /* The fade goes on the outer wrapper, never on .phone itself. An opacity
+     below 1 creates a grouping context, which forces transform-style back to
+     flat: putting it on the phone collapsed the whole 3D build and rendered
+     the front face through the back, screen text and all. The wrapper has no
+     3D properties of its own, so the perspective and preserve-3d inside it
+     survive and only the composited result is faded. */
+  var veilTarget = document.querySelector(".stage-wrap");
+  var veilBlocks = Array.prototype.slice.call(
+    document.querySelectorAll(".chapter__head, .chapter__foot"));
+  var veilCache = [];
+  var phoneH = 0;
+
+  function cacheVeil() {
+    phoneH = phone.offsetHeight;
+    veilCache = veilBlocks.map(function (b) {
+      var r = b.getBoundingClientRect();
+      return { top: r.top + window.scrollY, h: r.height };
+    });
+  }
+
+  function updateVeil(scale) {
+    if (!veilTarget) return;
+    if (!narrowQ.matches) {
+      if (veilTarget.style.opacity) veilTarget.style.opacity = "";
+      return;
+    }
+    var vh = window.innerHeight;
+    var half = phoneH * scale / 2;
+    var fTop = vh / 2 - half, fBot = vh / 2 + half;
+    var y = window.scrollY;
+    var worst = 0;
+
+    for (var i = 0; i < veilCache.length; i++) {
+      var t = veilCache[i].top - y;
+      var b = t + veilCache[i].h;
+      if (b < fTop || t > fBot) continue;
+      var overlap = Math.min(fBot, b) - Math.max(fTop, t);
+      var frac = overlap / Math.max(1, Math.min(fBot - fTop, veilCache[i].h));
+      if (frac > worst) worst = frac;
+    }
+    // floor of 0.20 is not arbitrary: at that value forest headings clear
+    // 5.6:1 and body copy 4.7:1 against the device, both AA. At 0.30 the
+    // body drops to 3.7:1 and fails.
+    veilTarget.style.opacity = (1 - Math.min(1, worst) * 0.8).toFixed(3);
+  }
+
   function render(p) {
+    var rx = sample(arc, "rx", p), ry = sample(arc, "ry", p), rz = sample(arc, "rz", p);
+    var sc = sample(arc, "s", p);
+
     phone.style.transform =
       "translate3d(" + sample(arc, "tx", p).toFixed(2) + "%," +
                        sample(arc, "ty", p).toFixed(2) + "%,0)" +
-      " rotateX(" + sample(arc, "rx", p).toFixed(2) + "deg)" +
-      " rotateY(" + sample(arc, "ry", p).toFixed(2) + "deg)" +
-      " rotateZ(" + sample(arc, "rz", p).toFixed(2) + "deg)" +
-      " scale(" + sample(arc, "s", p).toFixed(3) + ")";
+      " rotateX(" + rx.toFixed(2) + "deg)" +
+      " rotateY(" + ry.toFixed(2) + "deg)" +
+      " rotateZ(" + rz.toFixed(2) + "deg)" +
+      " scale(" + sc.toFixed(3) + ")";
+
+    applyLight(rx, ry, rz);
+    updateVeil(sc);
 
     // swapped inside the back-facing window (roughly p 0.42 to 0.66), so the
     // crossfade happens behind the device and is never seen
@@ -231,6 +367,7 @@
   // jump straight to the current position with no catch-up sweep: on load,
   // on resize, and when returning to a backgrounded tab where rAF was paused
   function snap() {
+    cacheVeil();
     target = eased = progress();
     render(eased);
   }

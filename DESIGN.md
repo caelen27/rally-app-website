@@ -104,6 +104,23 @@ Both the rails and the nubs need `backface-visibility: hidden`. Without it
 the far rail keeps painting, and once the body turns past 90 degrees
 perspective throws it clear of the silhouette as a detached floating bar.
 
+**Closed corners.** The rails have to stop short of the rounded outline, so
+the four vertical corners were open and you could see straight through the
+body at grazing angles. `main.js` generates a fan of seven narrow strips per
+corner, each tangent to the arc.
+
+**A real key light.** Every face used to carry a fixed gradient regardless of
+which way it pointed, so as the body turned the shading never moved and the
+panels read as separate flat stickers taped together. Each face's normal is
+now rotated into world space every frame, dotted with a fixed key light, and
+handed to CSS as `--lit`. This, plus the corners, is what makes the pieces
+read as one machined object rather than a kit of parts.
+
+**Never put opacity on `.phone`.** An opacity below 1 creates a grouping
+context, which forces `transform-style` back to flat and collapses the entire
+3D build: the front face renders through the back, screen text and all. Fade
+`.stage-wrap` instead, which has no 3D properties of its own.
+
 Dynamic Island, not a notch, and the status bar is pinned level with it
 rather than sitting underneath.
 
@@ -134,18 +151,20 @@ Three bands, and the middle one is the one that bites.
 **Above 1024** the stage is pinned and the phone tracks an arc that offsets it
 25 percent to the right, keeping the left column of copy clear.
 
-**At 1024 and below** the pinned stage is retired entirely. A phone pinned at
-the viewport centre and full-height text chapters in a single column always
-intersect: every block of copy passes through the centre as it scrolls, and
-there is no sideways room left to move the device into. flowty.co has exactly
-the same collision and gets away with it, being light type on a dark page; on
-cream it is glaring.
+**At 1024 and below** the stage stays pinned, so the device holds the screen
+the way it does on desktop. In one column the copy has nowhere to move
+sideways, so it does cross the phone between sections. Rather than let that
+read as a collision, `updateVeil()` measures the vertical overlap each frame
+and fades the stage to a backdrop while text is over it.
 
-So the stage rejoins the flow and takes a slot of its own between the hero and
-the second chapter. `display: contents` on `.chapters` promotes the individual
-chapters to flex items so the stage can be `order`ed between them. The tumble
-survives: `progress()` switches to measuring the stage's own travel through
-the viewport instead of scroll position along the track.
+The 0.20 floor is set by contrast, not taste: at that opacity forest headings
+clear 5.6:1 against the device and body copy 4.7:1, both AA. At 0.30 body copy
+drops to 3.7:1 and fails.
+
+Block positions are cached rather than measured per frame. Reading a rect
+straight after writing the phone's transform forces a synchronous reflow on
+every frame of the scroll; the phone sits at the viewport centre while pinned,
+so its band is arithmetic.
 
 The desktop display sizes also need stepping down here, or the h1 wraps to
 four lines and pushes the lede and both buttons below the fold on a 1024 by

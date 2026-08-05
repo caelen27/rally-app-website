@@ -589,6 +589,45 @@ section { position: relative; }
 .nub--vol2 { top: 34%; height: calc(48 * var(--px)); }
 .side--r .nub { right: calc(-2 * var(--px)); width: calc(var(--pd) + 4 * var(--px)); top: 27%; height: calc(74 * var(--px)); }
 
+/* ---------- corners ----------
+   Generated in main.js: a fan of narrow planes tangent to each corner arc.
+   Without them the four vertical corners are open, because the rails have to
+   stop short of the rounded outline, and at grazing angles you see straight
+   through the body. Closing them is most of what makes the pieces read as
+   one object. */
+.corner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--pd);
+  backface-visibility: hidden;
+  background: linear-gradient(90deg,
+    #0e1014 0%, #262a30 15%, #454a52 34%, #5d636c 50%,
+    #414750 66%, #22262c 85%, #0d0f13 100%);
+}
+
+/* ---------- key light ----------
+   --lit is written every frame by main.js: this face's normal, rotated into
+   world space and dotted with a fixed key light. Before this, every panel
+   carried the same gradient whichever way it was pointing, so as the body
+   turned the shading never moved and the faces read as separate flat
+   stickers taped together rather than one machined solid. */
+.face--back::before,
+.side::after,
+.corner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transform: translateZ(calc(0.3 * var(--px)));
+  /* Restrained on the white side: the reference device is nearly black, and
+     a strong key washed it out to mid grey. Most of the modelling comes from
+     the shade term instead. */
+  background: rgba(226, 238, 255, calc(var(--lit, 0.35) * 0.15));
+  box-shadow: inset 0 0 0 9999px rgba(4, 6, 9, calc((1 - var(--lit, 0.35)) * 0.62));
+}
+
 /* ---------- screen ---------- */
 
 .screen {
@@ -1329,39 +1368,20 @@ details p {
   .steps__grid { grid-template-columns: 1fr; }
   .masthead nav a:not(.btn) { display: none; }
 
-  /* Single column from here down, so the pinned stage is retired.
+  /* Single column, and the stage stays pinned so the device holds the
+     screen the way it does on desktop.
 
-     A phone pinned at the viewport centre and full-height text chapters in
-     one column always intersect: as you scroll, every block of copy passes
-     through the centre, and there is no sideways room to move the device
-     into. flowty.co has the same collision but hides it, being dark type on
-     a dark page. On cream it is glaring.
-
-     So the stage rejoins the flow and takes a slot of its own between the
-     hero and the second chapter. display:contents on .chapters promotes the
-     individual chapters to flex items so the stage can be ordered between
-     them. The tumble is kept: it is driven off the stage's own travel
-     through the viewport instead of scroll position along the track. */
-  .track { display: flex; flex-direction: column; }
-  .chapters { display: contents; }
-  .chapter:nth-child(1) { order: 1; }
-  .stage-wrap { order: 2; }
-  .chapter:nth-child(2) { order: 3; }
-  .chapter:nth-child(3) { order: 4; }
-
-  .stage-wrap {
-    position: relative;
-    height: auto;
-    aspect-ratio: 1 / 1;
-    max-height: 76vh;
-  }
+     In one column the copy has nowhere to move sideways, so it does cross
+     the phone between sections. Rather than let that read as a collision,
+     main.js measures the overlap each frame and fades the device back to a
+     backdrop while text is over it. flowty.co has the same crossing and
+     simply hides it, being light type on a dark page. */
   .stage { perspective-origin: 50% 50%; }
+  .stage-wrap { transition: opacity 0.25s var(--ease); }
   .chapter {
-    min-height: 0;
-    padding-top: calc(120 * var(--px));
+    padding-top: calc(150 * var(--px));
     padding-bottom: calc(120 * var(--px));
   }
-  .chapter:nth-child(1) { padding-top: calc(210 * var(--px)); padding-bottom: calc(40 * var(--px)); }
 }
 
 @media (max-width: 720px) {
