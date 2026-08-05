@@ -35,6 +35,7 @@
   --pr: calc(50 * var(--px));
   --cw: calc(134 * var(--px));  /* camera plateau, 40% of body width */
   --cd: calc(9 * var(--px));    /* how far the bump stands off the back */
+  --crad: calc(44 * var(--px)); /* plateau corner radius; walls inset by it */
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -366,115 +367,152 @@ section { position: relative; }
 
 .camera {
   position: absolute;
-  top: calc(27 * var(--px));
-  left: calc(27 * var(--px));
+  top: calc(26 * var(--px));
+  left: calc(26 * var(--px));
   width: var(--cw);
   height: var(--cw);
-  border-radius: calc(44 * var(--px));
+  border-radius: var(--crad);
   transform: translateZ(var(--cd));
   transform-style: preserve-3d;
   backface-visibility: hidden;
   background:
-    radial-gradient(115% 90% at 24% 14%, rgba(255, 255, 255, 0.09), transparent 58%),
-    linear-gradient(152deg, #33373d, #23262b 46%, #1a1d21);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    0 calc(5 * var(--px)) calc(16 * var(--px)) rgba(0, 0, 0, 0.55);
+    radial-gradient(120% 95% at 22% 12%, rgba(255, 255, 255, 0.07), transparent 62%),
+    linear-gradient(152deg, #2c3036, #212429 48%, #191c20);
+  /* A hard 1px inset rim drew a bright wire around the plateau and made it
+     read as pasted on. The rim is a soft gradient now, top-left only, the
+     way a machined edge actually catches light. */
+  box-shadow: 0 calc(5 * var(--px)) calc(18 * var(--px)) rgba(0, 0, 0, 0.6);
+}
+.camera::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(148deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.03) 26%, transparent 45%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 1px;
 }
 
 /* Walls sit in the bump's own shadow, so they read darker than both the
-   plateau above them and the panel they rise from. Lighter than this and the
-   bump looks like a grey wedge stuck on rather than machined into the body. */
+   plateau above them and the panel they rise from.
+
+   Each one is inset by the corner radius. Full-width walls overshot the
+   plateau's rounded corners and drew a hard square halo behind it, which is
+   what made the whole module look like a sticker rather than machined into
+   the back. */
 .cam-wall {
   position: absolute;
-  background: linear-gradient(180deg, #16191d, #0b0d10);
+  background: linear-gradient(180deg, #14171b, #0a0c0f);
+}
+.cam-wall--l,
+.cam-wall--r {
+  width: var(--cd);
+  height: calc(100% - var(--crad) * 1.5);
+  top: calc(var(--crad) * 0.75);
 }
 .cam-wall--l {
-  width: var(--cd); height: 100%;
-  top: 0; left: 0;
+  left: 0;
   transform-origin: 0 50%;
   transform: rotateY(90deg);
 }
 .cam-wall--r {
-  width: var(--cd); height: 100%;
-  top: 0; right: 0;
+  right: 0;
   transform-origin: 100% 50%;
   transform: rotateY(-90deg);
 }
+.cam-wall--t,
+.cam-wall--b {
+  height: var(--cd);
+  width: calc(100% - var(--crad) * 1.5);
+  left: calc(var(--crad) * 0.75);
+}
 .cam-wall--t {
-  width: 100%; height: var(--cd);
-  top: 0; left: 0;
+  top: 0;
   transform-origin: 50% 0;
   transform: rotateX(-90deg);
 }
 .cam-wall--b {
-  width: 100%; height: var(--cd);
-  bottom: 0; left: 0;
+  bottom: 0;
   transform-origin: 50% 100%;
   transform: rotateX(90deg);
 }
 
 /* Lens triangle: two down the left, one on the right slightly lower, which
    is the actual Pro arrangement. Flash sits top-right outside the triangle,
-   LiDAR bottom-right. */
+   LiDAR bottom-right.
+
+   The barrels are 38% of the plateau. At 34% they read as small grey discs;
+   on the real device they dominate the module. Each one is a machined ring
+   with a bright crown, a dark socket around it, and deep glass inside. */
 .lens {
   position: absolute;
-  width: calc(46 * var(--px));
-  height: calc(46 * var(--px));
+  width: calc(51 * var(--px));
+  height: calc(51 * var(--px));
   border-radius: 50%;
   background:
     radial-gradient(circle at 50% 50%,
-      #04060a 0 33%,
-      #0b0f13 39%,
-      #262b31 46%,
-      #545b64 50%,
-      #30353c 55%,
-      #202429 100%);
+      #03050a 0 29%,
+      #070a0e 35%,
+      #191d22 40%,
+      #454c55 44%,
+      #737b86 47.5%,
+      #454c56 51%,
+      #262b31 55%,
+      #171a1e 62%,
+      #101317 100%);
   box-shadow:
-    0 calc(1 * var(--px)) calc(4 * var(--px)) rgba(0, 0, 0, 0.75),
-    inset 0 calc(1 * var(--px)) calc(1 * var(--px)) rgba(255, 255, 255, 0.14);
+    0 calc(2 * var(--px)) calc(6 * var(--px)) rgba(0, 0, 0, 0.8),
+    0 0 0 calc(1 * var(--px)) rgba(0, 0, 0, 0.5),
+    inset 0 calc(1 * var(--px)) calc(1.5 * var(--px)) rgba(255, 255, 255, 0.2);
 }
-/* coating flare */
+/* coating flare across the glass */
 .lens::before {
   content: "";
   position: absolute;
-  inset: 28%;
+  inset: 30%;
   border-radius: 50%;
-  background: radial-gradient(circle at 64% 70%, rgba(56, 104, 132, 0.45), rgba(14, 44, 60, 0.14) 58%, transparent 76%);
+  background:
+    radial-gradient(circle at 66% 72%, rgba(62, 116, 148, 0.5), rgba(16, 50, 68, 0.16) 55%, transparent 74%),
+    radial-gradient(circle at 30% 26%, rgba(120, 90, 160, 0.16), transparent 60%);
 }
-/* specular pin */
+/* specular pin on the glass */
 .lens::after {
   content: "";
   position: absolute;
-  top: 29%; left: 28%;
-  width: 17%; height: 13%;
+  top: 31%; left: 30%;
+  width: 15%; height: 11%;
   border-radius: 50%;
-  background: rgba(214, 232, 250, 0.7);
-  filter: blur(calc(0.7 * var(--px)));
+  background: rgba(222, 238, 255, 0.78);
+  filter: blur(calc(0.6 * var(--px)));
 }
-.lens--1 { top: calc(12 * var(--px)); left: calc(12 * var(--px)); }
-.lens--2 { bottom: calc(12 * var(--px)); left: calc(12 * var(--px)); }
-.lens--3 { top: calc(44 * var(--px)); right: calc(10 * var(--px)); }
+.lens--1 { top: calc(11 * var(--px)); left: calc(11 * var(--px)); }
+.lens--2 { bottom: calc(11 * var(--px)); left: calc(11 * var(--px)); }
+.lens--3 { top: calc(41 * var(--px)); right: calc(9 * var(--px)); }
 
 .flash {
   position: absolute;
-  top: calc(14 * var(--px));
-  right: calc(20 * var(--px));
+  top: calc(13 * var(--px));
+  right: calc(19 * var(--px));
   width: calc(17 * var(--px));
   height: calc(17 * var(--px));
   border-radius: 50%;
-  background: radial-gradient(circle at 42% 36%, #fffdf2 0 24%, #d8d0b8 46%, #6a6456 80%, #33302a 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 42% 36%, #fffdf2 0 22%, #ddd5bd 44%, #6a6456 78%, #2e2b26 100%);
+  box-shadow: 0 0 0 calc(1 * var(--px)) rgba(0, 0, 0, 0.45);
 }
 .lidar {
   position: absolute;
-  bottom: calc(20 * var(--px));
-  right: calc(22 * var(--px));
-  width: calc(15 * var(--px));
-  height: calc(15 * var(--px));
+  bottom: calc(18 * var(--px));
+  right: calc(21 * var(--px));
+  width: calc(14 * var(--px));
+  height: calc(14 * var(--px));
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 36%, #2d323a 0 30%, #101216 72%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: radial-gradient(circle at 40% 36%, #262b33 0 32%, #0c0e12 74%);
+  box-shadow: 0 0 0 calc(1 * var(--px)) rgba(0, 0, 0, 0.45);
 }
 
 /* Flowty's render carries an Apple logo here. Rally's own mark goes on
@@ -1274,6 +1312,7 @@ details p {
     --pr: calc(41 * var(--px));
     --cw: calc(109 * var(--px));
     --cd: calc(7.5 * var(--px));
+    --crad: calc(36 * var(--px));
   }
   /* The desktop display sizes assume a wide viewport. Carried into the
      tablet band unchanged, the h1 wrapped to four lines and pushed the lede

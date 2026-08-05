@@ -164,11 +164,15 @@
 
   var target = 0, eased = 0, running = false;
 
-  /* When smooth scroll owns the page, scrollTop is already eased. Easing the
-     phone on top of that would compound the two and make it feel laggy, so
-     the scrub tracks scroll position exactly and lets the scroller do the
-     smoothing. Without smooth scroll (touch), the phone eases itself. */
-  function lerpRate() { return smoothActive ? 1 : 0.11; }
+  /* The scrub always tracks scroll position exactly.
+
+     With smooth scroll the page is already eased, so easing again would
+     compound the two curves. On touch there is no smooth scroller, but
+     native momentum is itself smooth and fires scroll events every frame,
+     so easing there just made the phone visibly lag behind the finger and
+     detach from the page. Either way the right answer is to follow scroll
+     one to one and let the platform own the smoothing. */
+  function lerpRate() { return 1; }
 
   var stageWrap = document.querySelector(".stage-wrap");
 
