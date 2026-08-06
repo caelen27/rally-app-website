@@ -39,13 +39,14 @@ const LINE        = "#ded8cc";   // --line
 const FOREST      = "#14532d";   // --forest / --accent
 const FOREST_DEEP = "#0d3b20";   // --forest-deep
 const PAPER       = "#faf7f0";   // --paper / --accent-ink
-const GRAPHIC     = "#d97706";   // --graphic
 const NAV_LABEL   = "#f2ede1";   // --ink-soft on dark nav
 
-/* The app runs on the system UI stack, not the landing page's Outfit. Using
-   Outfit here would make the screen look like the marketing site rather than
-   the product. */
-const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif';
+/* The app is set in Figtree, not the landing page's Outfit and not the system
+   stack. Using Outfit here would make the phone look like the marketing site
+   rather than the product, so index.html loads Figtree purely for this
+   texture. GRAPHIC is no longer used: the amber accent left the app's design
+   system, so nothing on this screen is orange. */
+const FONT = 'Figtree, "Segoe UI", system-ui, sans-serif';
 
 const PHOTO_SRC = "assets/img/app-basketball.jpg";
 
@@ -155,15 +156,11 @@ function homeIndicator(c) {
 
 /* ---------- app chrome ---------- */
 
-/* "first day" with the amber full stop the app appends via .wordmark::after */
+/* The app's wordmark is now "Firstday" at weight 720, with no trailing full
+   stop: the amber period went when the orange UI accent was dropped from the
+   design system, and the name resolved to one word to match this site. */
 function wordmark(c, x, baseline) {
-  const size = 20, weight = 800, ls = -1.1;
-  text(c, "first day", x, baseline, { size, weight, color: INK, ls });
-  c.font = `${weight} ${size}px ${FONT}`;
-  c.letterSpacing = ls + "px";
-  const w = c.measureText("first day").width;
-  c.letterSpacing = "0px";
-  text(c, ".", x + w + 1, baseline, { size, weight, color: GRAPHIC, ls });
+  text(c, "Firstday", x, baseline, { size: 18.4, weight: 720, color: INK, ls: -0.74 });
 }
 
 /* The app's signature shape: three soft corners and one tight bottom-right. */
