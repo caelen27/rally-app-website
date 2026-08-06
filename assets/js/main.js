@@ -1,5 +1,5 @@
 /* =========================================================================
-   Rally — scroll engine
+   Firstday — scroll engine
    ========================================================================= */
 
 (function () {
@@ -408,7 +408,7 @@
   }
 
   // the WebGL bootstrap calls this once it is ready, to take the first pose
-  window.__rallySnap = snap;
+  window.__firstdaySnap = snap;
 
   if (phone && track && !reduce.matches) {
     snap();
@@ -562,24 +562,24 @@
   var IMG = "?auto=format&fit=crop&w=620&h=820&q=72";
 
   var CAUSES = [
-    { t: "Sports and rec",   d: "Assistant coaching, refereeing, scorekeeping",
+    { t: "Sports and rec",       d: "Youth leagues, drop-in practices, tryout days",
       img: "1598880513655-d1c6d4b2dfbf", a: "#14532d",
       i: "M12 3a9 9 0 100 18 9 9 0 000-18zM12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18M3.5 9h17M3.5 15h17" },
-    { t: "Food security",    d: "Food banks, community fridges, meal programs",
-      img: "1588822534638-028d5ddc07ac", a: "#5c3608",
-      i: "M6 3v8a3 3 0 006 0V3M9 11v10M18 3c-1.5 2-2 4-2 6s.7 3 2 3v9" },
-    { t: "Animal welfare",   d: "Shelters, fostering support, adoption days",
-      img: "1604606363386-dd3f2357ad87", a: "#3a2154",
-      i: "M6.5 11a2 2 0 100-4 2 2 0 000 4zM17.5 11a2 2 0 100-4 2 2 0 000 4zM10 6.5a2 2 0 100-3.5 2 2 0 000 3.5zM14 6.5a2 2 0 100-3.5 2 2 0 000 3.5zM12 12c-3 0-5 2.2-5 4.6 0 1.8 1.4 2.9 3 2.4 1.4-.5 2.6-.5 4 0 1.6.5 3-.6 3-2.4 0-2.4-2-4.6-5-4.6z" },
-    { t: "Environment",      d: "Shoreline cleanups, tree planting, park care",
-      img: "1601566674556-3ac2a27fec9f", a: "#0e3a31",
-      i: "M12 21V9M12 9c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6zM12 13c0-3-2.2-5.2-5.2-5.2C6.8 10.8 9 13 12 13z" },
-    { t: "Seniors",          d: "Visiting programs, tech help, meal delivery",
-      img: "1581579439002-e29ac578f8d4", a: "#16304f",
-      i: "M12 8a3 3 0 100-6 3 3 0 000 6zM6 21v-4a6 6 0 0112 0v4M9 13.5l-2 3M15 13.5l2 3" },
-    { t: "Arts and culture", d: "Festivals, library programs, community theatre",
+    { t: "Arts and music",       d: "Studio classes, choirs, drama and dance",
       img: "1594051081684-2aef06f92655", a: "#511630",
-      i: "M4 20h16M7 20V9l5-5 5 5v11M10 20v-5h4v5" }
+      i: "M4 20h16M7 20V9l5-5 5 5v11M10 20v-5h4v5" },
+    { t: "Tutoring and mentoring", d: "Homework clubs, mentoring circles, skill-shares",
+      img: "1522202176988-66273c2fd55f", a: "#5c3608",
+      i: "M4 6h16M4 12h16M4 18h10" },
+    { t: "Outdoors and adventure", d: "Hiking groups, climbing gyms, outdoor clubs",
+      img: "1551632811-561732d1e306", a: "#0e3a31",
+      i: "M12 21V9M12 9c0-3.5 2.5-6 6-6 0 3.5-2.5 6-6 6zM12 13c0-3-2.2-5.2-5.2-5.2C6.8 10.8 9 13 12 13z" },
+    { t: "Support and belonging", d: "Peer support groups, faith youth groups, culture clubs",
+      img: "1529156069898-49953e39b3ac", a: "#16304f",
+      i: "M12 8a3 3 0 100-6 3 3 0 000 6zM6 21v-4a6 6 0 0112 0v4M9 13.5l-2 3M15 13.5l2 3" },
+    { t: "Games and clubs",      d: "Board game nights, esports meetups, maker spaces",
+      img: "1610890716171-6b1bb98ffd09", a: "#3a2154",
+      i: "M6.5 11a2 2 0 100-4 2 2 0 000 4zM17.5 11a2 2 0 100-4 2 2 0 000 4zM10 6.5a2 2 0 100-3.5 2 2 0 000 3.5zM14 6.5a2 2 0 100-3.5 2 2 0 000 3.5zM12 12c-3 0-5 2.2-5 4.6 0 1.8 1.4 2.9 3 2.4 1.4-.5 2.6-.5 4 0 1.6.5 3-.6 3-2.4 0-2.4-2-4.6-5-4.6z" }
   ];
 
   function causeCard(c, eager) {

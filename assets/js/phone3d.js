@@ -1,5 +1,5 @@
 /* =========================================================================
-   Rally — the device, in real 3D.
+   Firstday — the device, in real 3D.
 
    This replaces a CSS build that used flat planes for every face. That
    approach has a hard ceiling: CSS 3D has no curved surfaces, so the edges

@@ -1,5 +1,5 @@
 /* =========================================================================
-   Rally — early access form
+   Firstday — early access form
 
    ─────────────────────────────────────────────────────────────────────────
    TO GO LIVE: put your endpoint in FORM_ENDPOINT below. That is the only
@@ -75,7 +75,7 @@ var FORM_ENDPOINT = "";
   function text(t) { return document.createTextNode(t); }
   function mailLink() {
     var a = document.createElement("a");
-    a.href = "mailto:caelen@truemeridianai.com?subject=Rally%20early%20access";
+    a.href = "mailto:caelen@truemeridianai.com?subject=Firstday%20early%20access";
     a.textContent = "caelen@truemeridianai.com";
     return a;
   }

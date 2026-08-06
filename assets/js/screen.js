@@ -1,5 +1,5 @@
 /* =========================================================================
-   Rally — the app UI, painted to a canvas for use as a texture on the 3D
+   Firstday — the app UI, painted to a canvas for use as a texture on the 3D
    device.
 
    It was live HTML when the phone was a CSS build. A WebGL surface cannot
@@ -154,7 +154,7 @@ function tabBar(c, w, h) {
   c.lineWidth = 2;
   c.beginPath(); c.moveTo(0, top); c.lineTo(w, top); c.stroke();
 
-  const tabs = ["Shifts", "Nearby", "Hours", "You"];
+  const tabs = ["Trials", "Nearby", "Friends", "You"];
   const gy = top + 44;
   for (let i = 0; i < 4; i++) {
     const cx = w * (i + 0.5) / 4;
@@ -172,10 +172,11 @@ function tabBar(c, w, h) {
       c.moveTo(cx - 9, gy - 4); c.lineTo(cx, gy + 12); c.lineTo(cx + 9, gy - 4);
       c.stroke();
       c.beginPath(); c.arc(cx, gy - 4, 3, 0, 7); c.fill();
-    } else if (i === 2) {                // ring
-      c.beginPath(); c.arc(cx, gy, 12, 0, 7); c.stroke();
-      c.beginPath(); c.moveTo(cx, gy - 7); c.lineTo(cx, gy); c.lineTo(cx + 6, gy);
-      c.stroke();
+    } else if (i === 2) {                // two overlapping people, for "bring a friend"
+      c.beginPath(); c.arc(cx - 5, gy - 7, 6, 0, 7); c.stroke();
+      c.beginPath(); c.arc(cx + 5, gy - 7, 6, 0, 7); c.stroke();
+      c.beginPath(); c.arc(cx - 5, gy + 13, 11, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+      c.beginPath(); c.arc(cx + 5, gy + 13, 11, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
     } else {                             // person
       c.beginPath(); c.arc(cx, gy - 6, 7, 0, 7); c.stroke();
       c.beginPath(); c.arc(cx, gy + 16, 13, Math.PI * 1.15, Math.PI * 1.85);
@@ -209,43 +210,43 @@ function home(c, w, h) {
   c.font = `400 50px ${FONT}`;
   c.fillText("This week, Amara.", 44, 214);
   c.fillStyle = "rgba(233,233,239,0.66)";
-  c.fillText("Two shifts booked, 1", 44, 272);
-  c.fillText("open near you.", 44, 330);
+  c.fillText("2 trial days saved, 1", 44, 272);
+  c.fillText("starting Friday.", 44, 330);
 
-  sectionLabel(c, w, 404, "BOOKED");
-  bookedCard(c, w, 428, "SATURDAY", "Kitchen crew",
-    "Feed Scarborough · 10:00 to 13:00 · 1.2 km");
-  bookedCard(c, w, 610, "TUESDAY", "Assistant coach, U14",
-    "Scarborough Soccer · 18:00 to 19:30 · 2.8 km");
+  sectionLabel(c, w, 404, "SAVED");
+  bookedCard(c, w, 428, "SATURDAY", "Life drawing, drop-in",
+    "Studio Six Arts · 10:00 to 11:30 · 1.2 km");
+  bookedCard(c, w, 610, "FRIDAY", "U14 soccer, trial practice",
+    "Scarborough Soccer Club · 18:00 to 19:30 · 2.8 km");
 
-  // hours progress
+  // capacity meter: how many spots are already taken on the saved trial day
   const hy = 792;
   card(c, w, hy, 182);
   c.fillStyle = MUTED;
   c.font = `300 23px ${FONT}`;
-  c.fillText("Hours toward your 40", 72, hy + 44);
+  c.fillText("Spots filling up", 72, hy + 44);
 
   c.fillStyle = TEXT;
   c.font = `300 58px ${FONT}`;
-  c.fillText("24.5", 72, hy + 104);
-  // measured, not a guessed offset: 58px "24.5" is wider than the gap was
-  const nw = c.measureText("24.5").width;
+  c.fillText("12", 72, hy + 104);
+  // measured, not a guessed offset: 58px "12" is wider than the gap was
+  const nw = c.measureText("12").width;
   c.fillStyle = FAINT;
   c.font = `300 22px ${FONT}`;
-  c.fillText("confirmed by coordinators", 72 + nw + 16, hy + 104);
+  c.fillText("of 20 already going Friday", 72 + nw + 16, hy + 104);
 
   c.fillStyle = "rgba(255,255,255,0.12)";
   rr(c, 72, hy + 132, w - 144, 12, 6); c.fill();
-  const pg = c.createLinearGradient(72, 0, 72 + (w - 144) * 0.61, 0);
+  const pg = c.createLinearGradient(72, 0, 72 + (w - 144) * 0.6, 0);
   pg.addColorStop(0, GREEN_DIM);
   pg.addColorStop(1, "#7bdf9f");
   c.fillStyle = pg;
-  rr(c, 72, hy + 132, (w - 144) * 0.61, 12, 6); c.fill();
+  rr(c, 72, hy + 132, (w - 144) * 0.6, 12, 6); c.fill();
 
-  sectionLabel(c, w, 1042, "OPEN NEAR YOU");
-  openCard(c, w, 1066, "Saturday food bank", "Feed Scarborough · 09:00 · 1.2 km",
+  sectionLabel(c, w, 1042, "STARTING THIS WEEK");
+  openCard(c, w, 1066, "Beginner pottery wheel", "Clayground Studio · Sat 13:00 · 1.2 km",
     "94% MATCH");
-  openCard(c, w, 1248, "Homework club", "Malvern Library · Thu 16:00 · 3.4 km",
+  openCard(c, w, 1248, "Homework club, drop-in", "Agincourt CS · Thu 16:00 · 3.4 km",
     "88% MATCH");
 
   tabBar(c, w, h);
@@ -280,16 +281,16 @@ function shift(c, w, h) {
   c.beginPath(); c.arc(78, 84, 7, 0, 7); c.fill();
   c.font = `500 22px ${FONT}`;
   c.letterSpacing = "1.4px";
-  c.fillText("ON SHIFT · SCARBOROUGH", 100, 92);
+  c.fillText("AT THE TRIAL · SCARBOROUGH", 100, 92);
   c.letterSpacing = "0px";
 
   c.fillStyle = TEXT;
   c.font = `300 150px ${FONT}`;
-  c.fillText("2:14", 70, 252);
+  c.fillText("1:14", 70, 252);
 
   c.fillStyle = MUTED;
   c.font = `300 26px ${FONT}`;
-  c.fillText("elapsed · 3.0 hrs scheduled", 74, 302);
+  c.fillText("elapsed · 90 min session", 74, 302);
 
   // elapsed against scheduled, the one number the whole screen is about
   const bw = 560;
@@ -303,10 +304,10 @@ function shift(c, w, h) {
 
   c.fillStyle = "rgba(233,233,239,0.9)";
   c.font = `400 34px ${FONT}`;
-  c.fillText("Feed Scarborough", 74, 432);
+  c.fillText("Studio Six Arts", 74, 432);
   c.fillStyle = FAINT;
   c.font = `300 24px ${FONT}`;
-  c.fillText("Kitchen crew · 4 on today · Nadia coordinating", 74, 474);
+  c.fillText("Life drawing, drop-in · 4 first-timers today", 74, 474);
 
   // crew, as plain initial chips
   const crew = ["A", "J", "M", "R"];
@@ -337,7 +338,7 @@ function shift(c, w, h) {
 
   c.fillStyle = FAINT;
   c.font = `300 22px ${FONT}`;
-  c.fillText("Counts toward your 40", px + pw / 2, 344);
+  c.fillText("Free trial · no cost to attend", px + pw / 2, 344);
   c.textAlign = "left";
 
   c.restore();

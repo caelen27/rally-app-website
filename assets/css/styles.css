@@ -1,5 +1,5 @@
 /* =========================================================================
-   Rally — landing page
+   Firstday — landing page
    Fluid unit system: every value is authored against a 1920px canvas and
    scales linearly with the viewport, clamped between 1024px and 2560px.
    calc(170 * var(--px)) === 170px at 1920w, 127.5px at 1440w.
@@ -526,7 +526,7 @@ section { position: relative; }
   box-shadow: 0 0 0 calc(1 * var(--px)) rgba(0, 0, 0, 0.45);
 }
 
-/* Flowty's render carries an Apple logo here. Rally's own mark goes on
+/* Flowty's render carries an Apple logo here. Firstday's own mark goes on
    instead: putting Apple's trademark on our marketing implies an
    endorsement that does not exist. */
 .badge-back {
