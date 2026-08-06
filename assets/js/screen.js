@@ -1,52 +1,56 @@
 /* =========================================================================
-   Firstday — the real app screen, painted to a canvas for use as a texture
-   on the 3D device.
+   Firstday — the real app homescreen, painted to a canvas for use as a
+   texture on the 3D device.
 
-   This is not an invented mock. It is the Discover screen of the actual
-   Firstday app (the Vite build in APP FOR SLP), reproduced from measurements
-   taken off the running app at a 402x874 logical viewport: every position,
-   size, weight and colour below was read out of getComputedStyle rather than
-   eyeballed. Authoring in the app's own logical units means the numbers here
-   can be diffed against the app directly when it changes.
+   Not an invented mock. This is the Discover screen of the actual Firstday
+   app (the Vite build in APP FOR SLP), reproduced from getComputedStyle
+   measurements taken off the running app at a 402x874 logical viewport.
+   Authoring in the app's own logical units means the numbers here can be
+   diffed against the app directly when it changes.
 
-   Painted rather than screenshotted on purpose. A 1206x2622 screenshot of the
-   same screen was 914KB as PNG, and 355KB as JPEG with visible ringing around
-   the UI text, which is exactly the content JPEG handles worst. Drawing it
-   keeps the type vector-crisp at any size and costs one 123KB photo.
+   The app was redesigned since the previous version of this file: the cream
+   and forest palette is gone, replaced by a monochrome system on a light grey
+   canvas with translucent "liquid glass" chrome, fully rounded geometry, a
+   swipeable hero card deck, and a floating dark pill dock. Everything below
+   tracks that.
 
-   One deliberate difference from the running app: the category chip strip.
-   The app sets scroll-snap-align:start on chips inside a scroller with 18px
-   padding, so the scroller snaps to scrollLeft 18 on load and the leading
-   gutter collapses, leaving the "All" chip flush against the screen edge.
-   That is a bug in the app, not a design choice, so the chips start at the
-   normal 18px margin here.
+   Painted rather than screenshotted. A 1206x2622 capture of this screen runs
+   ~900KB as PNG, and JPEG puts visible ringing around UI text on flat fills,
+   which is most of this design. Drawing it keeps type vector-crisp at any
+   size and costs one photo.
    ========================================================================= */
 
-/* The panel is 1206x2622. The app's layout is authored in CSS pixels at a
-   402pt-wide viewport, and 402 x 3 = 1206, so everything below is written in
-   the app's own units and scaled by exactly 3 on paint. */
+/* The panel is 1206x2622. The app lays out in CSS pixels at 402pt wide, and
+   402 x 3 = 1206, so everything below is written in the app's own units and
+   scaled by exactly 3 on paint. */
 export const SCREEN_W = 1206;
 export const SCREEN_H = 2622;
 
 const DW = 402, DH = 874;
 
-/* Straight out of the app's :root tokens. */
-const CANVAS      = "#faf7f0";   // --canvas
-const SURFACE     = "#ffffff";   // --surface
-const INK         = "#1c1917";   // --ink
-const INK_MUTED   = "#6f675c";   // --ink-muted
-const LINE        = "#ded8cc";   // --line
-const FOREST      = "#14532d";   // --forest / --accent
-const FOREST_DEEP = "#0d3b20";   // --forest-deep
-const PAPER       = "#faf7f0";   // --paper / --accent-ink
-const NAV_LABEL   = "#f2ede1";   // --ink-soft on dark nav
+/* The app starts its content at y=16 because a browser has no status bar.
+   On the device it needs to clear one, so app content is shifted down by
+   this much and the iOS chrome is drawn into the gap. */
+const TOP = 46;
 
-/* The app is set in Figtree, not the landing page's Outfit and not the system
-   stack. Using Outfit here would make the phone look like the marketing site
-   rather than the product, so index.html loads Figtree purely for this
-   texture. GRAPHIC is no longer used: the amber accent left the app's design
-   system, so nothing on this screen is orange. */
-const FONT = 'Figtree, "Segoe UI", system-ui, sans-serif';
+/* Straight out of the app's :root tokens. */
+const CANVAS   = "#f2f2f4";   // --canvas
+const INK      = "#0c0c0e";   // --ink
+const INK_MUT  = "#5f5f68";   // --ink-muted
+const LINE     = "#e0e0e5";   // --line
+const ACCENT   = "#18181b";   // --accent
+const CHROME   = "#17171b";   // --chrome
+const PAPER    = "#ffffff";   // --paper
+const ON_PAPER = "#101014";   // --ink-on-paper
+const GLASS_BG = "rgba(255,255,255,0.62)";   // --glass-bg
+const GLASS_BD = "rgba(255,255,255,0.76)";   // --glass-border
+const DOCK_BG  = "rgba(20,20,24,0.92)";      // --glass-chrome-bg
+const DOCK_BD  = "rgba(255,255,255,0.12)";   // --glass-chrome-border
+
+/* The app moved to Outfit, which this site already loads for its own type,
+   so the phone and the page share a family now. That is the app's choice,
+   not a shortcut here. */
+const FONT = 'Outfit, "Segoe UI", system-ui, sans-serif';
 
 const PHOTO_SRC = "assets/img/app-basketball.jpg";
 
@@ -54,7 +58,7 @@ let photo = null;
 let photoReady = null;
 
 /** Kick off the card photo load. Resolves whether or not it succeeds, so a
-    blocked image degrades to a flat placeholder instead of hanging the paint. */
+    blocked image degrades to a flat fill instead of hanging the paint. */
 export function loadAssets() {
   if (photoReady) return photoReady;
   photoReady = new Promise(resolve => {
@@ -69,17 +73,14 @@ export function loadAssets() {
 /* ---------- primitives ---------- */
 
 function rr(c, x, y, w, h, r) {
-  const rad = typeof r === "number" ? [r, r, r, r] : r;   // tl, tr, br, bl
+  const m = Math.min(w, h) / 2;
+  const rad = Math.min(r, m);
   c.beginPath();
-  c.moveTo(x + rad[0], y);
-  c.lineTo(x + w - rad[1], y);
-  c.arcTo(x + w, y, x + w, y + rad[1], rad[1]);
-  c.lineTo(x + w, y + h - rad[2]);
-  c.arcTo(x + w, y + h, x + w - rad[2], y + h, rad[2]);
-  c.lineTo(x + rad[3], y + h);
-  c.arcTo(x, y + h, x, y + h - rad[3], rad[3]);
-  c.lineTo(x, y + rad[0]);
-  c.arcTo(x, y, x + rad[0], y, rad[0]);
+  c.moveTo(x + rad, y);
+  c.arcTo(x + w, y, x + w, y + h, rad);
+  c.arcTo(x + w, y + h, x, y + h, rad);
+  c.arcTo(x, y + h, x, y, rad);
+  c.arcTo(x, y, x + w, y, rad);
   c.closePath();
 }
 
@@ -93,20 +94,15 @@ function text(c, str, x, y, { size = 16, weight = 400, color = INK, ls = 0, alig
   c.textAlign = "left";
 }
 
+
 /* ---------- iOS chrome ---------- */
 
-/* The app itself has no status bar; this is the phone's, drawn so the render
-   reads as a device running the app rather than a screenshot floating in a
-   frame. The app's own top padding leaves exactly this much room. */
-/* The three glyphs are laid out from the right edge inward with real gaps
-   between them. An earlier pass derived each x from a single right anchor and
-   the cellular bars, the wifi arcs and the battery all overlapped. */
 function statusBar(c) {
   text(c, "9:41", 52, 40, { size: 17, weight: 600, color: INK });
 
-  const baseline = 36;
+  const base = 36;
 
-  // battery, right-most: body 351..376 with the terminal pip past it
+  // battery
   c.strokeStyle = INK;
   c.globalAlpha = 0.4;
   c.lineWidth = 1.1;
@@ -118,24 +114,23 @@ function statusBar(c) {
   c.fillStyle = INK;
   rr(c, 352.8, 26.8, 18.5, 8.4, 2.2); c.fill();
 
-  // wifi, centred at 336 so its widest arc stops ~6px short of the battery
-  const wx = 336;
+  // wifi
   c.strokeStyle = INK;
   c.lineWidth = 1.9;
   c.lineCap = "round";
   for (let i = 0; i < 3; i++) {
     c.beginPath();
-    c.arc(wx, baseline, 3.1 + i * 3.4, -Math.PI * 0.75, -Math.PI * 0.25);
+    c.arc(336, base, 3.1 + i * 3.4, -Math.PI * 0.75, -Math.PI * 0.25);
     c.stroke();
   }
   c.fillStyle = INK;
-  c.beginPath(); c.arc(wx, baseline - 1.4, 1.5, 0, 7); c.fill();
+  c.beginPath(); c.arc(336, base - 1.4, 1.5, 0, 7); c.fill();
 
-  // cellular, four bars ending ~5px before the wifi arcs
+  // cellular
   for (let i = 0; i < 4; i++) {
     const bh = 4 + i * 2.5;
     c.fillStyle = INK;
-    rr(c, 304 + i * 4.8, baseline - bh, 3.2, bh, 1);
+    rr(c, 304 + i * 4.8, base - bh, 3.2, bh, 1);
     c.fill();
   }
 }
@@ -146,250 +141,301 @@ function dynamicIsland(c) {
   c.fill();
 }
 
-/* Light, because the bottom of this screen is the card photo. iOS flips the
-   indicator against the content behind it and a dark bar was invisible here. */
 function homeIndicator(c) {
-  c.fillStyle = "rgba(255,255,255,0.62)";
+  c.fillStyle = "rgba(12,12,14,0.26)";
   rr(c, DW / 2 - 67, DH - 12, 134, 5, 2.5);
   c.fill();
 }
 
+/* ---------- icons ---------- */
+
+function strokeIcon(c, color, w = 1.8) {
+  c.strokeStyle = color;
+  c.fillStyle = color;
+  c.lineWidth = w;
+  c.lineCap = "round";
+  c.lineJoin = "round";
+}
+
+function personGlyph(c, cx, cy, r, color) {
+  strokeIcon(c, color, 1.9);
+  c.beginPath(); c.arc(cx, cy - r * 0.34, r * 0.36, 0, 7); c.stroke();
+  c.beginPath();
+  c.arc(cx, cy + r * 0.62, r * 0.62, Math.PI * 1.13, Math.PI * 1.87);
+  c.stroke();
+}
+
 /* ---------- app chrome ---------- */
 
-/* The app's wordmark is now "Firstday" at weight 720, with no trailing full
-   stop: the amber period went when the orange UI accent was dropped from the
-   design system, and the name resolved to one word to match this site. */
-function wordmark(c, x, baseline) {
-  text(c, "Firstday", x, baseline, { size: 18.4, weight: 720, color: INK, ls: -0.74 });
+function greeting(c) {
+  const y = TOP;
+  text(c, "Hello there", 20, y + 45, { size: 26, weight: 700, color: INK, ls: -0.57 });
+  text(c, "Welcome to Firstday", 20, y + 69, { size: 13, weight: 400, color: INK_MUT, ls: -0.18 });
+
+  // avatar: a filled dark circle, not the old squircle tile
+  const ax = 334, ay = y + 25.4, s = 48;
+  c.fillStyle = CHROME;
+  c.beginPath(); c.arc(ax + s / 2, ay + s / 2, s / 2, 0, 7); c.fill();
+  personGlyph(c, ax + s / 2, ay + s / 2, 11, "#fafafa");
 }
 
-/* The app's signature shape: three soft corners and one tight bottom-right. */
-function notchedRect(c, x, y, w, h, big, small) {
-  rr(c, x, y, w, h, [big, big, small, big]);
-}
-
-function topBar(c) {
-  wordmark(c, 18, 96);
-
-  // FD avatar button, right-aligned in the 366-wide top bar
-  const s = 48, bx = 18 + 366 - s, by = 65;
-  c.fillStyle = FOREST;
-  notchedRect(c, bx, by, s, s, 10, 4);
-  c.fill();
-  text(c, "FD", bx + s / 2, by + s / 2 + 6, { size: 16, weight: 760, color: PAPER, align: "center" });
-}
-
-function intro(c) {
-  text(c, "PARKDALE", 20, 171, { size: 14, weight: 700, color: INK_MUTED, ls: 0.77 });
-
-  // 40.2px / 39.4 line height, tracking -1.005, forest
-  const h = { size: 40.2, weight: 790, color: FOREST, ls: -1.005 };
-  text(c, "Ready for a first", 20, 216, h);
-  text(c, "day?", 20, 255, h);
-
-  const p = { size: 16, weight: 400, color: INK_MUTED };
-  text(c, "Low-pressure ways to try something new, with", 20, 296, p);
-  text(c, "other first-timers already joining.", 20, 320, p);
+/* Translucent white over a light canvas reads as a flat near-white fill once
+   composited, so the glass is painted as its resolved colour plus the bright
+   hairline and the inset top highlight that sell it. */
+function glassPill(c, x, y, w, h) {
+  c.fillStyle = GLASS_BG;
+  rr(c, x, y, w, h, h / 2); c.fill();
+  c.strokeStyle = GLASS_BD;
+  c.lineWidth = 1;
+  rr(c, x + 0.5, y + 0.5, w - 1, h - 1, (h - 1) / 2); c.stroke();
+  c.strokeStyle = "rgba(255,255,255,0.85)";
+  c.lineWidth = 1;
+  c.beginPath();
+  c.arc(x + w / 2, y + h / 2, h / 2 - 1, Math.PI * 1.28, Math.PI * 1.72);
+  c.stroke();
 }
 
 function searchRow(c) {
-  // field
-  c.fillStyle = SURFACE;
-  rr(c, 18, 354, 303, 54, 12); c.fill();
-  c.strokeStyle = LINE; c.lineWidth = 1; c.stroke();
+  const y = TOP + 94.7;
+  glassPill(c, 20, y, 300, 54);
 
   // magnifier
-  const gx = 45, gy = 381;
-  c.strokeStyle = INK_MUTED; c.lineWidth = 1.9; c.lineCap = "round";
-  c.beginPath(); c.arc(gx, gy - 1.5, 7, 0, 7); c.stroke();
-  c.beginPath(); c.moveTo(gx + 5, gy + 3.5); c.lineTo(gx + 9.5, gy + 8); c.stroke();
+  const gx = 48, gy = y + 27;
+  strokeIcon(c, INK_MUT, 1.9);
+  c.beginPath(); c.arc(gx, gy - 1.5, 7.2, 0, 7); c.stroke();
+  c.beginPath(); c.moveTo(gx + 5.2, gy + 3.7); c.lineTo(gx + 10, gy + 8.4); c.stroke();
 
-  text(c, "Search activities", 63, 387, { size: 16, color: INK_MUTED });
+  text(c, "Search", 68, y + 33, { size: 16, weight: 400, color: INK_MUT });
 
-  // filter button
-  c.fillStyle = FOREST;
-  notchedRect(c, 330, 354, 54, 54, 10, 4);
-  c.fill();
-  c.strokeStyle = PAPER; c.lineWidth = 1.8; c.lineCap = "round";
-  const fx = 357;
-  [[372, 6], [381, -4], [390, 3]].forEach(([yy, knob]) => {
-    c.beginPath(); c.moveTo(fx - 10, yy); c.lineTo(fx + 10, yy); c.stroke();
-    c.beginPath(); c.arc(fx + knob, yy, 2.9, 0, 7);
-    c.fillStyle = FOREST; c.fill(); c.stroke();
+  // filter button: solid dark circle
+  const fx = 328, fs = 54;
+  c.fillStyle = ACCENT;
+  c.beginPath(); c.arc(fx + fs / 2, y + fs / 2, fs / 2, 0, 7); c.fill();
+
+  strokeIcon(c, PAPER, 1.9);
+  const cx = fx + fs / 2;
+  [[-6, 8], [1, -5], [8, 4]].forEach(([dy, knob]) => {
+    const ly = y + fs / 2 + dy;
+    c.beginPath(); c.moveTo(cx - 10, ly); c.lineTo(cx + 10, ly); c.stroke();
+    c.beginPath(); c.arc(cx + knob, ly, 2.9, 0, 7);
+    c.fillStyle = ACCENT; c.fill(); c.stroke();
+  });
+}
+
+function sectionLead(c) {
+  text(c, "Select your next first day", 20, TOP + 203, {
+    size: 21, weight: 700, color: INK, ls: -0.38
   });
 }
 
 function chips(c) {
-  /* Widths measured off the app. Starting at 18 rather than the app's
-     snapped-to-0, see the note at the top of this file. */
   const row = [
-    ["All", 56, true],
-    ["Sports", 84, false],
-    ["Art & making", 127, false],
-    ["Music", 78, false]
+    ["All", 55, true],
+    ["Sports", 80, false],
+    ["Art & making", 121, false],
+    ["Music", 74, false]
   ];
-  let x = 18;
-  const y = 422, h = 44;
+  const y = TOP + 221, h = 44;
+  let x = 20;
   for (const [label, w, active] of row) {
-    c.fillStyle = active ? FOREST : SURFACE;
-    rr(c, x, y, w, h, h / 2); c.fill();
-    if (!active) { c.strokeStyle = LINE; c.lineWidth = 1; c.stroke(); }
+    if (active) {
+      c.fillStyle = ACCENT;
+      rr(c, x, y, w, h, h / 2); c.fill();
+    } else {
+      glassPill(c, x, y, w, h);
+    }
     text(c, label, x + w / 2, y + h / 2 + 5, {
-      size: 14, weight: 650, color: active ? PAPER : INK_MUTED, align: "center"
+      size: 14, weight: 600, color: active ? PAPER : "#4a4a52", align: "center"
     });
     x += w + 8;
   }
 }
 
-function sectionHead(c) {
-  text(c, "PICKED FOR YOU", 18, 519, { size: 14, weight: 700, color: INK_MUTED, ls: 0.77 });
-  text(c, "Try something this week", 18, 548, { size: 25.6, weight: 760, color: FOREST, ls: -0.64 });
+/* ---------- hero deck ---------- */
 
-  // "See all", underlined
-  const sx = 329, sy = 540;
-  text(c, "See all", sx, sy, { size: 14.4, weight: 720, color: INK });
-  c.font = `720 14.4px ${FONT}`;
-  const sw = c.measureText("See all").width;
-  c.strokeStyle = INK; c.lineWidth = 1;
-  c.beginPath(); c.moveTo(sx, sy + 4.5); c.lineTo(sx + sw, sy + 4.5); c.stroke();
-}
+/* Three overlapping photo cards. The two behind are inset by --peek and show
+   photograph only: the app drops their copy because a 26px sliver cannot
+   carry a headline. */
+function heroDeck(c) {
+  const dx = 20, dy = TOP + 283, dw = 362, dh = 391;
+  const peek = 26, r = 28;
 
-function heartIcon(c, cx, cy, r) {
-  c.beginPath();
-  c.moveTo(cx, cy + r * 0.75);
-  c.bezierCurveTo(cx - r * 1.5, cy - r * 0.3, cx - r * 0.55, cy - r * 1.25, cx, cy - r * 0.35);
-  c.bezierCurveTo(cx + r * 0.55, cy - r * 1.25, cx + r * 1.5, cy - r * 0.3, cx, cy + r * 0.75);
-  c.closePath();
-}
-
-function eventCard(c) {
-  const x = 1, y = 574, w = 328, h = 453;
-
-  // body plate
-  c.fillStyle = SURFACE;
-  notchedRect(c, x, y, w, h, 18, 8);
-  c.fill();
-  c.strokeStyle = LINE; c.lineWidth = 1; c.stroke();
-
-  // media: featured cards run the photo full-bleed to the card's top corners
-  const mh = 303;
-  c.save();
-  rr(c, x, y, w, mh, [18, 18, 0, 0]);
-  c.clip();
-  if (photo) {
-    c.drawImage(photo, x, y, w, mh);
-  } else {
-    c.fillStyle = "#f2ede1";
-    c.fillRect(x, y, w, mh);
+  // cards behind, left and right slivers
+  for (const side of [-1, 1]) {
+    const bx = dx + peek + side * 15;
+    c.save();
+    rr(c, bx, dy + 12, dw - peek * 2, dh - 24, r);
+    c.clip();
+    if (photo) c.drawImage(photo, bx - 30 * side, dy + 12, dw - peek * 2 + 60, dh - 24);
+    else { c.fillStyle = "#e8e8ec"; c.fillRect(bx, dy + 12, dw - peek * 2, dh - 24); }
+    c.fillStyle = "rgba(6,6,8,0.3)";
+    c.fillRect(bx, dy + 12, dw - peek * 2, dh - 24);
+    c.restore();
   }
-  c.restore();
 
-  // save button
-  const sb = 44, sx = 273, sy = 586;
-  c.fillStyle = PAPER;
-  notchedRect(c, sx, sy, sb, sb, 9, 4);
-  c.fill();
-  c.strokeStyle = INK; c.lineWidth = 1.7; c.lineJoin = "round";
-  heartIcon(c, sx + sb / 2, sy + sb / 2, 8);
-  c.stroke();
-
-  // body copy
-  text(c, "Sports", 19, 908, { size: 16, weight: 400, color: INK });
-  text(c, "Open Court First Day", 19, 934, { size: 17.6, weight: 700, color: INK });
-  text(c, "Aug 8 · 2:00–4:00 PM", 19, 954, { size: 16, weight: 400, color: INK });
-  text(c, "Westside Community Gym", 19, 976, { size: 14, weight: 400, color: INK_MUTED });
-  text(c, "1.2 km away", 19, 1005, { size: 14, weight: 400, color: INK_MUTED });
-  text(c, "12 first-timers", 111, 1005, { size: 14, weight: 400, color: INK_MUTED });
-
-  // round arrow
-  const ax = 275, ay = 971, as = 40;
-  c.fillStyle = FOREST;
-  notchedRect(c, ax, ay, as, as, 8, 3);
-  c.fill();
-  c.strokeStyle = PAPER; c.lineWidth = 1.9; c.lineCap = "round"; c.lineJoin = "round";
-  const mx = ax + as / 2, my = ay + as / 2;
-  c.beginPath(); c.moveTo(mx - 7, my); c.lineTo(mx + 7, my); c.stroke();
-  c.beginPath(); c.moveTo(mx + 2.5, my - 4.5); c.lineTo(mx + 7, my); c.lineTo(mx + 2.5, my + 4.5); c.stroke();
-
-  // the next card in the scroller, peeking past the right edge
-  c.fillStyle = SURFACE;
-  notchedRect(c, 342, y, 60, h, 18, 8);
-  c.fill();
-  c.strokeStyle = LINE; c.lineWidth = 1; c.stroke();
+  // front card
+  const cx = dx + peek, cw = dw - peek * 2;
   c.save();
-  rr(c, 342, y, 60, mh, [18, 18, 0, 0]);
+  rr(c, cx, dy, cw, dh, r);
   c.clip();
-  c.fillStyle = "#dfe7e3";
-  c.fillRect(342, y, 60, mh);
+
+  if (photo) c.drawImage(photo, cx, dy, cw, dh);
+  else { c.fillStyle = "#e8e8ec"; c.fillRect(cx, dy, cw, dh); }
+
+  /* The app's scrim: dense where the copy sits, fully clear by 78% up, so the
+     top two-thirds of the photograph stay bright. */
+  const g = c.createLinearGradient(0, dy + dh, 0, dy);
+  g.addColorStop(0.00, "rgba(6,6,8,0.92)");
+  g.addColorStop(0.34, "rgba(6,6,8,0.86)");
+  g.addColorStop(0.50, "rgba(6,6,8,0.66)");
+  g.addColorStop(0.64, "rgba(6,6,8,0.26)");
+  g.addColorStop(0.78, "rgba(6,6,8,0)");
+  c.fillStyle = g;
+  c.fillRect(cx, dy, cw, dh);
+
+  // badge, top left
+  const bw = 128, bh = 32, bx = cx + 12, by = dy + 12;
+  c.fillStyle = PAPER;
+  rr(c, bx, by, bw, bh, bh / 2); c.fill();
+  // check-in-seal mark
+  c.fillStyle = ON_PAPER;
+  c.beginPath(); c.arc(bx + 18, by + bh / 2, 7.5, 0, 7); c.fill();
+  strokeIcon(c, PAPER, 1.8);
+  c.beginPath();
+  c.moveTo(bx + 14.6, by + bh / 2);
+  c.lineTo(bx + 17.2, by + bh / 2 + 2.6);
+  c.lineTo(bx + 21.6, by + bh / 2 - 2.8);
+  c.stroke();
+  text(c, "12 first-timers", bx + 31, by + bh / 2 + 4.5, { size: 12, weight: 600, color: ON_PAPER });
+
+  // save button, top right
+  const sx = cx + cw - 12 - 44, sy = dy + 12, ss = 44;
+  c.fillStyle = "rgba(255,255,255,0.18)";
+  c.beginPath(); c.arc(sx + ss / 2, sy + ss / 2, ss / 2, 0, 7); c.fill();
+  c.strokeStyle = "rgba(255,255,255,0.42)";
+  c.lineWidth = 1;
+  c.beginPath(); c.arc(sx + ss / 2, sy + ss / 2, ss / 2 - 0.5, 0, 7); c.stroke();
+  strokeIcon(c, PAPER, 1.8);
+  const hx = sx + ss / 2, hy = sy + ss / 2, hr = 7.4;
+  c.beginPath();
+  c.moveTo(hx, hy + hr * 0.78);
+  c.bezierCurveTo(hx - hr * 1.55, hy - hr * 0.32, hx - hr * 0.56, hy - hr * 1.3, hx, hy - hr * 0.36);
+  c.bezierCurveTo(hx + hr * 0.56, hy - hr * 1.3, hx + hr * 1.55, hy - hr * 0.32, hx, hy + hr * 0.78);
+  c.closePath(); c.stroke();
+
+  // copy block, anchored to the bottom of the card
+  const left = cx + 16, right = cx + cw - 16, bottom = dy + dh - 12;
+  const ctaH = 50, ctaY = bottom - ctaH;
+
+  text(c, "Sports · 1.2 km away", left, ctaY - 92, {
+    size: 12, weight: 500, color: "rgba(255,255,255,0.92)"
+  });
+
+  text(c, "Open Court First Day", left, ctaY - 68, {
+    size: 20, weight: 600, color: "#fff", ls: -0.44
+  });
+  text(c, "Free trial", right, ctaY - 68, { size: 14, weight: 600, color: "#fff", align: "right" });
+
+  const d = { size: 13, weight: 400, color: "rgba(255,255,255,0.88)" };
+  text(c, "Try a relaxed afternoon of pickup basketball with", left, ctaY - 46, d);
+  text(c, "coaches nearby to help. Teams change often, an…", left, ctaY - 28, d);
+
+  // call to action
+  c.fillStyle = "rgba(255,255,255,0.16)";
+  rr(c, left, ctaY, right - left, ctaH, ctaH / 2); c.fill();
+  c.strokeStyle = "rgba(255,255,255,0.24)";
+  c.lineWidth = 1;
+  rr(c, left + 0.5, ctaY + 0.5, right - left - 1, ctaH - 1, (ctaH - 1) / 2); c.stroke();
+  text(c, "See more", (left + right) / 2 - 18, ctaY + ctaH / 2 + 5, {
+    size: 14, weight: 500, color: PAPER, align: "center"
+  });
+
+  const ix = right - 4 - 42, iy = ctaY + 4, is = 42;
+  c.fillStyle = PAPER;
+  c.beginPath(); c.arc(ix + is / 2, iy + is / 2, is / 2, 0, 7); c.fill();
+  strokeIcon(c, ON_PAPER, 1.9);
+  const ax = ix + is / 2, ay = iy + is / 2;
+  c.beginPath(); c.moveTo(ax - 6.5, ay); c.lineTo(ax + 6.5, ay); c.stroke();
+  c.beginPath(); c.moveTo(ax + 2.2, ay - 4.4); c.lineTo(ax + 6.5, ay); c.lineTo(ax + 2.2, ay + 4.4); c.stroke();
+
   c.restore();
 }
 
-/* Bottom tab bar: a floating forest slab, not a full-width bar. */
-function tabBar(c) {
-  const x = 14, y = 768, w = 374, h = 76;
-  c.fillStyle = FOREST_DEEP;
-  rr(c, x, y, w, h, 16); c.fill();
-  c.strokeStyle = FOREST; c.lineWidth = 1; c.stroke();
-
-  const items = ["Discover", "Plans", "Friends", "Saved", "You"];
-  const cols = [24, 95, 167, 238, 310];
-  const colW = 68;
-
-  items.forEach((label, i) => {
-    const cx = cols[i] + colW / 2;
+/* The dot for the current card stretches into a short bar rather than just
+   changing colour. */
+function deckDots(c) {
+  const y = TOP + 677.6 + 22;
+  const dots = 4, gap = 44;
+  const total = (dots - 1) * gap;
+  let x = DW / 2 - total / 2;
+  for (let i = 0; i < dots; i++) {
     const on = i === 0;
+    c.fillStyle = on ? ACCENT : LINE;
+    if (on) rr(c, x - 11, y - 3.5, 22, 7, 3.5);
+    else rr(c, x - 3.5, y - 3.5, 7, 7, 3.5);
+    c.fill();
+    x += gap;
+  }
+}
+
+/* ---------- dock ---------- */
+
+/* A floating dark pill, not a full-width bar: 268 wide, centred, 12 up from
+   the bottom, with five 48px circular slots. */
+function dock(c) {
+  const w = 268, h = 60, x = (DW - w) / 2, y = DH - 12 - h;
+
+  c.fillStyle = DOCK_BG;
+  rr(c, x, y, w, h, h / 2); c.fill();
+  c.strokeStyle = DOCK_BD;
+  c.lineWidth = 1;
+  rr(c, x + 0.5, y + 0.5, w - 1, h - 1, (h - 1) / 2); c.stroke();
+
+  const slot = 48, pad = 6;
+  for (let i = 0; i < 5; i++) {
+    const sx = x + pad + i * 52, sy = y + pad;
+    const on = i === 0;
+    const cx = sx + slot / 2, cy = sy + slot / 2;
 
     if (on) {
-      c.fillStyle = FOREST;
-      notchedRect(c, cx - 23, y + 3.5, 46, 46, 9, 4);
-      c.fill();
+      c.fillStyle = PAPER;
+      c.beginPath(); c.arc(cx, cy, slot / 2, 0, 7); c.fill();
     }
+    const col = on ? ON_PAPER : "rgba(255,255,255,0.62)";
 
-    const iy = y + 26;
-    c.strokeStyle = on ? "#ffffff" : NAV_LABEL;
-    c.fillStyle = on ? "#ffffff" : NAV_LABEL;
-    c.lineWidth = 1.7;
-    c.lineCap = "round";
-    c.lineJoin = "round";
-
-    if (i === 0) {                       // compass
-      c.beginPath(); c.arc(cx, iy, 9.5, 0, 7); c.stroke();
-      /* Lucide's compass needle: a kite between the NE and SW tips. The
-         earlier point order traced a near-degenerate sliver that vanished at
-         this size, so the waist is widened and the path drawn tip to tip. */
+    if (i === 0) {                       // house
+      strokeIcon(c, col, 1.9);
       c.beginPath();
-      c.moveTo(cx + 4.6, iy - 4.6);
-      c.lineTo(cx + 1.1, iy + 1.1);
-      c.lineTo(cx - 4.6, iy + 4.6);
-      c.lineTo(cx - 1.1, iy - 1.1);
-      c.closePath(); c.fill();
+      c.moveTo(cx - 8.5, cy + 0.5); c.lineTo(cx, cy - 7.5); c.lineTo(cx + 8.5, cy + 0.5);
+      c.stroke();
+      c.beginPath();
+      c.moveTo(cx - 6.4, cy - 0.6); c.lineTo(cx - 6.4, cy + 8);
+      c.lineTo(cx + 6.4, cy + 8); c.lineTo(cx + 6.4, cy - 0.6);
+      c.stroke();
     } else if (i === 1) {                // calendar
-      rr(c, cx - 9, iy - 8, 18, 17, 3); c.stroke();
-      c.beginPath(); c.moveTo(cx - 9, iy - 3); c.lineTo(cx + 9, iy - 3); c.stroke();
-      c.beginPath(); c.moveTo(cx - 4.5, iy - 11); c.lineTo(cx - 4.5, iy - 6); c.stroke();
-      c.beginPath(); c.moveTo(cx + 4.5, iy - 11); c.lineTo(cx + 4.5, iy - 6); c.stroke();
+      strokeIcon(c, col, 1.8);
+      rr(c, cx - 8.5, cy - 7.5, 17, 16, 3.4); c.stroke();
+      c.beginPath(); c.moveTo(cx - 8.5, cy - 2.6); c.lineTo(cx + 8.5, cy - 2.6); c.stroke();
+      c.beginPath(); c.moveTo(cx - 4, cy - 10.4); c.lineTo(cx - 4, cy - 5.6); c.stroke();
+      c.beginPath(); c.moveTo(cx + 4, cy - 10.4); c.lineTo(cx + 4, cy - 5.6); c.stroke();
     } else if (i === 2) {                // two people
-      c.beginPath(); c.arc(cx - 4, iy - 4, 4.2, 0, 7); c.stroke();
-      c.beginPath(); c.arc(cx + 5.5, iy - 5, 3.4, 0, 7); c.stroke();
-      c.beginPath(); c.arc(cx - 4, iy + 9, 7.5, Math.PI * 1.12, Math.PI * 1.88); c.stroke();
-      c.beginPath(); c.arc(cx + 6, iy + 8, 6, Math.PI * 1.2, Math.PI * 1.8); c.stroke();
-    } else if (i === 3) {                // bookmark
+      strokeIcon(c, col, 1.8);
+      c.beginPath(); c.arc(cx - 3.8, cy - 3.4, 4, 0, 7); c.stroke();
+      c.beginPath(); c.arc(cx + 5.4, cy - 4.4, 3.2, 0, 7); c.stroke();
+      c.beginPath(); c.arc(cx - 3.8, cy + 8.6, 7.2, Math.PI * 1.14, Math.PI * 1.86); c.stroke();
+      c.beginPath(); c.arc(cx + 5.8, cy + 7.6, 5.6, Math.PI * 1.22, Math.PI * 1.78); c.stroke();
+    } else if (i === 3) {                // heart
+      strokeIcon(c, col, 1.8);
+      const r2 = 7.6;
       c.beginPath();
-      c.moveTo(cx - 7, iy - 9); c.lineTo(cx + 7, iy - 9);
-      c.lineTo(cx + 7, iy + 9); c.lineTo(cx, iy + 3); c.lineTo(cx - 7, iy + 9);
+      c.moveTo(cx, cy + r2 * 0.8);
+      c.bezierCurveTo(cx - r2 * 1.55, cy - r2 * 0.3, cx - r2 * 0.56, cy - r2 * 1.3, cx, cy - r2 * 0.36);
+      c.bezierCurveTo(cx + r2 * 0.56, cy - r2 * 1.3, cx + r2 * 1.55, cy - r2 * 0.3, cx, cy + r2 * 0.8);
       c.closePath(); c.stroke();
-    } else {                             // person in a circle
-      c.beginPath(); c.arc(cx, iy, 10, 0, 7); c.stroke();
-      c.beginPath(); c.arc(cx, iy - 3, 3.6, 0, 7); c.stroke();
-      c.beginPath(); c.arc(cx, iy + 9.5, 6.2, Math.PI * 1.18, Math.PI * 1.82); c.stroke();
+    } else {                             // person
+      personGlyph(c, cx, cy, 10.5, col);
     }
-
-    /* The app sets these at 16px, which only just clears the 68px column.
-       15 keeps the same read at this render size with no risk of collision. */
-    text(c, label, cx, y + 62, {
-      size: 15, weight: 400, color: on ? "#ffffff" : NAV_LABEL, align: "center"
-    });
-  });
+  }
 }
 
 /* ---------- compose ---------- */
@@ -411,13 +457,13 @@ function build() {
   c.fillRect(0, 0, DW, DH);
 
   statusBar(c);
-  topBar(c);
-  intro(c);
+  greeting(c);
   searchRow(c);
+  sectionLead(c);
   chips(c);
-  sectionHead(c);
-  eventCard(c);
-  tabBar(c);
+  heroDeck(c);
+  deckDots(c);
+  dock(c);
   dynamicIsland(c);
   homeIndicator(c);
 
@@ -425,7 +471,7 @@ function build() {
 }
 
 /** Paint the app screen onto the texture canvas. The blend argument is kept
-    for call-site compatibility; there is only one screen now. */
+    for call-site compatibility; there is only one screen. */
 export function paintScreen(canvas, _blend) {
   if (!layer) layer = build();
   const c = canvas.getContext("2d");
