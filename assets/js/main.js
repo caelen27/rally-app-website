@@ -296,8 +296,14 @@
      3D properties of its own, so the perspective and preserve-3d inside it
      survive and only the composited result is faded. */
   var veilTarget = document.querySelector(".stage-wrap");
+  /* The threaded chapters have no .chapter__head/.chapter__foot wrappers:
+     their headline and lede sit directly in the chapter so the halves can be
+     placed either side of the device. They have to be listed here too, or the
+     fade only tracks the hero and the stacked narrow-screen layout drops dark
+     body copy straight onto the lit phone screen, which is unreadable where it
+     crosses the card photo. */
   var veilBlocks = Array.prototype.slice.call(
-    document.querySelectorAll(".chapter__head, .chapter__foot"));
+    document.querySelectorAll(".chapter__head, .chapter__foot, .thread, .thread__lede"));
   var veilCache = [];
   var phoneH = 0;
 
@@ -559,7 +565,10 @@
      ========================================================================= */
 
   var U = "https://images.unsplash.com/photo-";
-  var IMG = "?auto=format&fit=crop&w=620&h=820&q=72";
+  /* compress alongside format, and q62 rather than 72: these are 220px-wide
+     cards in a moving strip, so the difference is invisible and it takes a
+     meaningful bite out of the six-image payload. */
+  var IMG = "?auto=format,compress&fit=crop&w=620&h=820&q=62";
 
   var CAUSES = [
     { t: "Sports and rec",       d: "Youth leagues, drop-in practices, tryout days",

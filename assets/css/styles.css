@@ -918,43 +918,53 @@ section { position: relative; }
 .chapter__foot { max-width: calc(620 * var(--px)); }
 
 /* Threaded chapters: the big headline splits left and right of the
-   dead-centre device, both halves vertically centred, so the text reads as
-   wrapping around the phone the way flowty's "On Your Wrist" section does. */
-.chapter--thread {
-  justify-content: center;
-  padding-block: calc(120 * var(--px));
-}
-/* A three-column grid keeps the device gap dead-centre no matter how wide
-   each headline half is: two equal 1fr columns flank a fixed centre column
-   the width of the device. space-between was jamming the halves to the
-   viewport edges and leaving a lopsided gap to the phone. The halves now hug
-   the device symmetrically, right-aligned on the left and left-aligned on the
-   right, with a consistent breathing gap set by the padding. */
-.thread {
-  display: grid;
-  grid-template-columns: 1fr calc(380 * var(--px)) 1fr;
-  align-items: center;
-  width: 100%;
-  font-size: calc(132 * var(--px));
-  line-height: 0.9;
-}
-.thread__l {
-  grid-column: 1;
-  text-align: right;
-  padding-right: calc(56 * var(--px));
-}
-.thread__r {
-  grid-column: 3;
-  text-align: left;
-  padding-left: calc(56 * var(--px));
-}
-/* the supporting line sits under the right half, clear of the device */
-.thread__lede {
-  position: absolute;
-  right: calc(64 * var(--px));
-  bottom: calc(96 * var(--px));
-  text-align: right;
-  max-width: calc(520 * var(--px));
+   dead-centre device, so the text reads as wrapping around the phone the way
+   flowty's "On Your Wrist" section does.
+
+   That flanking only works while there is room either side of the device, so
+   it is a wide-viewport enhancement rather than the default. Below 1025 the
+   two halves collapse back to one ordinary stacked headline and the lede
+   returns to normal flow. Shipping the grid at every width pushed
+   .thread__r past the right edge and gave the whole page a horizontal
+   scrollbar from 1024 down. */
+.thread { line-height: 0.9; }
+.thread__l,
+.thread__r { display: block; }
+
+@media (min-width: 1025px) {
+  .chapter--thread {
+    justify-content: center;
+    padding-block: calc(120 * var(--px));
+  }
+  /* Two equal 1fr columns flank a fixed centre column the width of the
+     device, so the gap the phone sits in stays dead-centre no matter how
+     wide either headline half runs. space-between jammed the halves against
+     the viewport edges and left a lopsided gap to the phone. */
+  .thread {
+    display: grid;
+    grid-template-columns: 1fr calc(380 * var(--px)) 1fr;
+    align-items: center;
+    width: 100%;
+    font-size: calc(132 * var(--px));
+  }
+  .thread__l {
+    grid-column: 1;
+    text-align: right;
+    padding-right: calc(56 * var(--px));
+  }
+  .thread__r {
+    grid-column: 3;
+    text-align: left;
+    padding-left: calc(56 * var(--px));
+  }
+  /* the supporting line sits under the right half, clear of the device */
+  .thread__lede {
+    position: absolute;
+    right: calc(64 * var(--px));
+    bottom: calc(96 * var(--px));
+    text-align: right;
+    max-width: calc(520 * var(--px));
+  }
 }
 
 /* ---------- Full-bleed parallax band ----------
@@ -1537,9 +1547,15 @@ details p {
   .orgs { margin-inline: calc(24 * var(--px)); padding: calc(70 * var(--px)) calc(34 * var(--px)); border-radius: calc(40 * var(--px)); }
   .fcard { padding: calc(40 * var(--px)); border-radius: calc(34 * var(--px)); }
 
+  /* The floating pill is fixed about 57px up from the bottom edge and only
+     hides over the closing CTA, so it sits above whatever is at the foot of
+     the viewport everywhere else. At 90 the chapter's bottom padding landed
+     exactly on the pill's top edge and the hero footnote and the last line of
+     each threaded headline ran underneath it. 150 clears the pill with air to
+     spare. */
   .chapter {
     padding-top: calc(130 * var(--px));
-    padding-bottom: calc(90 * var(--px));
+    padding-bottom: calc(150 * var(--px));
   }
   .stage { perspective-origin: 50% 50%; }
   /* the inline mark lands mid-wrap at this width and reads as a stray glyph */
@@ -1554,6 +1570,29 @@ details p {
   .pill { bottom: calc(20 * var(--px)); }
   .pill__link { display: none; }
   summary { font-size: calc(20 * var(--px)); }
+
+  /* Every control is sized with the fluid unit, so at phone widths the
+     primary CTAs come out around 35px tall, the tabs 30 and the strip toggle
+     29. That clears the 24px WCAG 2.2 floor but sits well under the 44px both
+     Apple and Google ask for, and these are the exact controls the page
+     exists to get tapped. min-height raises the touch target without
+     touching the type scale or the fluid padding. */
+  .btn,
+  .tab,
+  .marquee-toggle,
+  .wordmark,
+  .skip-link { min-height: 44px; }
+
+  /* The legal rows are navigation, not prose, so WCAG 2.2's inline-link
+     exemption does not cover them and a 15px-tall target is hard to hit.
+     Growing the hit area vertically leaves the wrapped rows looking the same,
+     since the flex gap already spaces them further apart than this padding. */
+  .foot__legal a,
+  .doc-foot a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 
 /* =========================================================================

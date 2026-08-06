@@ -330,9 +330,13 @@
 <!-- ===================== Full-bleed parallax band ===================== -->
 <section class="band" aria-labelledby="band-h">
   <div class="band__media" aria-hidden="true">
+    <!-- w1600 with compress, rather than w2200/q72: this sits under a heavy
+         green scrim, so the extra detail was invisible and cost 383KB, by far
+         the heaviest asset on the page. Keeping auto=format (not fm=webp) so
+         Unsplash still negotiates avif/webp/jpeg per browser. -->
     <img class="band__img"
-         src="https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format&fit=crop&w=2200&h=1300&q=72"
-         alt="" loading="lazy" decoding="async">
+         src="https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format,compress&fit=crop&w=1600&h=945&q=55"
+         alt="" loading="lazy" decoding="async" fetchpriority="low">
     <div class="band__scrim"></div>
   </div>
   <div class="band__inner">
@@ -474,7 +478,7 @@
    module, older browser) leaves the CSS build in place untouched, so the
    page degrades rather than breaking. */
 import { createPhone } from "./assets/js/phone3d.js";
-import { paintScreen, resetLayers, SCREEN_W, SCREEN_H } from "./assets/js/screen.js";
+import { paintScreen, resetLayers, loadAssets, SCREEN_W, SCREEN_H } from "./assets/js/screen.js";
 
 const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -528,16 +532,20 @@ try {
     phone.draw();
   }
 
-  /* Outfit has to be resident before the screen is painted, or the texture
-     bakes in the fallback face and never updates. */
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () {
-      resetLayers();
-      paintScreen(screenCanvas, blend);
-      phone.refreshScreen();
-      settle();
-    });
+  /* The screen texture bakes in whatever is available at paint time, so it has
+     to be repainted once the webfont is resident and once the card photo has
+     decoded. Both resolve independently; either one landing repaints. */
+  function repaint() {
+    resetLayers();
+    paintScreen(screenCanvas, blend);
+    phone.refreshScreen();
+    settle();
   }
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(repaint);
+  }
+  loadAssets().then(repaint);
 
   settle();
 } catch (e) {
