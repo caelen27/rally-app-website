@@ -1,5 +1,5 @@
 /* =========================================================================
-   Firstday — early access form
+   Firstday — contact form
 
    ─────────────────────────────────────────────────────────────────────────
    TO GO LIVE: put your endpoint in FORM_ENDPOINT below. That is the only
@@ -16,7 +16,7 @@ var FORM_ENDPOINT = "";
 (function () {
   "use strict";
 
-  var form = document.getElementById("earlyAccess");
+  var form = document.getElementById("contactForm");
   if (!form) return;
 
   var statusEl = document.getElementById("formStatus");
@@ -75,7 +75,7 @@ var FORM_ENDPOINT = "";
   function text(t) { return document.createTextNode(t); }
   function mailLink() {
     var a = document.createElement("a");
-    a.href = "mailto:caelen@truemeridianai.com?subject=Firstday%20early%20access";
+    a.href = "mailto:caelen@truemeridianai.com?subject=Firstday";
     a.textContent = "caelen@truemeridianai.com";
     return a;
   }
@@ -97,7 +97,7 @@ var FORM_ENDPOINT = "";
       setStatus("pending", [
         text("This form is not connected to a backend yet, so nothing was sent. Email us at "),
         mailLink(),
-        text(" and we will add you to the list by hand.")
+        text(" instead and we will pick it up there.")
       ]);
       return;
     }
@@ -105,7 +105,7 @@ var FORM_ENDPOINT = "";
     var payload = {
       name: form.name.value.trim(),
       email: form.email.value.trim(),
-      audience: form.audience.value,
+      subject: form.subject.value.trim(),
       message: form.message.value.trim()
     };
 
@@ -126,7 +126,7 @@ var FORM_ENDPOINT = "";
       })
       .catch(function () {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Request early access";
+        submitBtn.textContent = "Send message";
         setStatus("error", [
           text("Something went wrong sending that. Try again, or email "),
           mailLink(),

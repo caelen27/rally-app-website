@@ -1517,7 +1517,16 @@ details p {
 
 @media (max-width: 720px) {
   :root {
-    --px: calc(100vw / 620);
+    /* The unit was authored against a 620px canvas, so on a real 375 to 430px
+       phone every value in the sheet resolved to 60-70% of its intended size.
+       Body copy came out at 10.3px, the hero footnote at 8.5px and button
+       labels at 10.3px: the design only ever read correctly at exactly 620
+       wide, which is not a phone. Basing it on 400 and capping it at 1 puts
+       body copy at 16px on a 375 screen and holds that size upward instead of
+       inflating toward the tablet band. Everything below that is not a font
+       size is re-counted to hold its old physical size against the new unit,
+       so this is a type correction, not a re-layout. */
+    --px: min(1px, calc(100vw / 400));
     --pw: calc(230 * var(--px));
     --ph: calc(478 * var(--px));
     --pd: calc(20 * var(--px));
@@ -1525,10 +1534,10 @@ details p {
   }
   body { font-size: calc(17 * var(--px)); }
 
-  .display { font-size: calc(78 * var(--px)); }
-  .display--xl { font-size: calc(120 * var(--px)); }
-  .display--md { font-size: calc(58 * var(--px)); }
-  .title-sm { font-size: calc(36 * var(--px)); }
+  .display { font-size: calc(50 * var(--px)); }
+  .display--xl { font-size: calc(77 * var(--px)); }
+  .display--md { font-size: calc(40 * var(--px)); }
+  .title-sm { font-size: calc(26 * var(--px)); }
   .lede { font-size: calc(19 * var(--px)); }
   .body-lg { font-size: calc(26 * var(--px)); }
 
@@ -1564,11 +1573,32 @@ details p {
   .odo { font-size: calc(150 * var(--px)); }
   .odo__reel, .odo__strip span { height: calc(140 * var(--px)); }
 
+  /* These two frame their own mock UI, whose type is sized in the same unit.
+     Re-counting the frame without re-counting what is inside it shrinks the
+     box away from its contents, which is what pushed the matcher prop's copy
+     straight through the bottom of the phone. Both keep their counts. */
   .cause { width: calc(220 * var(--px)); height: calc(300 * var(--px)); }
   .prop { width: calc(290 * var(--px)); height: calc(590 * var(--px)); }
-  .strengths li { grid-template-columns: calc(120 * var(--px)) 1fr auto; gap: calc(12 * var(--px)); }
+  /* Three columns needs a label column wide enough for "Tutoring and
+     mentoring", which at a readable body size is most of a phone's width.
+     The label takes its own row instead, and the meter and its number share
+     the one below. */
+  .strengths li {
+    grid-template-columns: 1fr auto;
+    gap: calc(7 * var(--px)) calc(14 * var(--px));
+  }
+  .strengths li > span:first-child { grid-column: 1 / -1; }
+  /* "Free" is 79px here, which leaves too little of the card's inner width to
+     set "during the pilot" beside it without breaking to three lines. */
+  .price__amount { display: block; }
+  .price__amount span { display: block; margin-top: calc(4 * var(--px)); }
+
   .pill { bottom: calc(20 * var(--px)); }
   .pill__link { display: none; }
+  /* The floating pill carries the same CTA and is on screen from the very top
+     on mobile, so the masthead copy of it read as the same button printed
+     twice in one view. The wordmark is all the masthead needs here. */
+  .masthead nav .btn { display: none; }
   summary { font-size: calc(20 * var(--px)); }
 
   /* Every control is sized with the fluid unit, so at phone widths the
@@ -1607,17 +1637,38 @@ details p {
   .strengths .meter i { transition: none; }
   .scr { transition: none; }
 
+  .scr--home { opacity: 1 !important; }
+  .scr--shift { opacity: 0 !important; }
+}
+
+/* =========================================================================
+   Parked device — reduced motion, and every phone-width screen.
+
+   The pinned, scroll-scrubbed device only reads as a composition where the
+   copy has somewhere sideways to go. In one narrow column it ends up behind
+   the text, and the backdrop fade that kept the type legible made the device
+   look like a smudge sitting under the headline rather than a product shot.
+   Below 720 the device stops being a backdrop and becomes a block of its own,
+   sitting between the hero and the threaded chapters, at full opacity.
+   ========================================================================= */
+
+@media (prefers-reduced-motion: reduce), (max-width: 720px) {
   /* The chapters normally sit on top of the pinned stage via a negative
-     margin. With nothing pinned, that margin has to go, and the stage becomes
-     an ordinary block. Order puts the headline first and the phone after the
-     three chapters, as the payoff rather than a lead-in. */
-  .track { display: flex; flex-direction: column; }
-  .chapters { order: 1; margin-top: 0; }
+     margin. With nothing pinned that margin has to go, and the stage becomes
+     an ordinary block. display:contents dissolves the .chapters wrapper so
+     the three chapters and the stage are all flex children of the track and
+     can be ordered against each other: hero, device, then the two threads. */
+  .track { display: flex; flex-direction: column; padding-bottom: 0; }
+  .chapters { display: contents; }
+  .chapter:nth-child(1) { order: 1; }
+  .stage-wrap { order: 2; }
+  .chapter:nth-child(2) { order: 3; }
+  .chapter:nth-child(3) { order: 4; }
+
   .stage-wrap {
-    order: 2;
     position: relative;
     height: auto;
-    padding-block: calc(40 * var(--px)) calc(20 * var(--px));
+    padding-block: calc(30 * var(--px)) calc(50 * var(--px));
   }
   .phone {
     position: relative;
@@ -1635,13 +1686,35 @@ details p {
 
   .scr--home { opacity: 1 !important; }
   .scr--shift { opacity: 0 !important; }
-  .chapter { min-height: 0; padding-block: calc(90 * var(--px)); }
+  /* The floating pill is fixed ~20px up from the bottom edge and stands about
+     60 tall, so the bottom padding has to clear it in real pixels — the fluid
+     unit shrinks with the viewport and on a 390-wide phone 90 units is only
+     57px, which put the last line of each threaded headline under the pill. */
+  /* The chapter is a space-between column sized by a 100vh min-height on
+     desktop, so the head and foot are pushed apart by free space. Dropping the
+     min-height removes all of it and the last line of the headline sat
+     directly on top of the lede; the gap replaces what the free space was
+     doing. */
+  .chapter {
+    min-height: 0;
+    gap: calc(44 * var(--px));
+    padding-top: calc(90 * var(--px));
+    padding-bottom: max(calc(90 * var(--px)), 104px);
+  }
   /* clear the absolutely positioned masthead */
-  .chapter:first-child { padding-top: calc(190 * var(--px)); }
+  .chapter:nth-child(1) { padding-top: calc(190 * var(--px)); }
+}
+
+/* Phone-width corrections to the parked layout above. Kept separate so the
+   block stays shared with desktop reduced motion, where the unit resolves
+   against a 1920 canvas and these counts would be far too small. */
+@media (max-width: 720px) {
+  .stage.is-gl .stage-gl { height: calc(430 * var(--px)); }
+  .chapter:nth-child(1) { padding-top: calc(125 * var(--px)); }
 }
 
 /* =========================================================================
-   Sub-page chrome (legal documents, early access) — shared, so it lives
+   Sub-page chrome (legal documents, contact form) — shared, so it lives
    here rather than in legal.css which the form page does not load.
    ========================================================================= */
 

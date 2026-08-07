@@ -6,6 +6,13 @@
   "use strict";
 
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  /* Phone widths lay the device out as a static block between the chapters
+     rather than pinning it behind them (see "Parked device" in styles.css).
+     Nothing is pinned there, so the scroll arc has nothing to pose and the
+     backdrop fade has no collision to solve — running either just dimmed a
+     device that was no longer under the text. */
+  var parkQ = window.matchMedia("(max-width: 720px)");
+  function parked() { return reduce.matches || parkQ.matches; }
   var SVGNS = "http://www.w3.org/2000/svg";
 
   /* ---------------- helpers ---------------- */
@@ -318,7 +325,7 @@
 
   function updateVeil(scale) {
     if (!veilTarget) return;
-    if (!narrowQ.matches) {
+    if (!narrowQ.matches || parked()) {
       if (veilTarget.style.opacity) veilTarget.style.opacity = "";
       return;
     }
@@ -416,7 +423,7 @@
   // the WebGL bootstrap calls this once it is ready, to take the first pose
   window.__firstdaySnap = snap;
 
-  if (phone && track && !reduce.matches) {
+  if (phone && track && !parked()) {
     snap();
     addEventListener("scroll", measure, { passive: true });
     addEventListener("resize", snap);
