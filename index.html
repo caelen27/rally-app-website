@@ -329,25 +329,6 @@
   </div>
 </section>
 
-<!-- ===================== Full-bleed parallax band ===================== -->
-<section class="band" aria-labelledby="band-h">
-  <div class="band__media" aria-hidden="true">
-    <!-- w1600 with compress, rather than w2200/q72: this sits under a heavy
-         green scrim, so the extra detail was invisible and cost 383KB, by far
-         the heaviest asset on the page. Keeping auto=format (not fm=webp) so
-         Unsplash still negotiates avif/webp/jpeg per browser. -->
-    <img class="band__img"
-         src="https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format,compress&fit=crop&w=1600&h=945&q=55"
-         alt="" loading="lazy" decoding="async" fetchpriority="low">
-    <div class="band__scrim"></div>
-  </div>
-  <div class="band__inner">
-    <p class="eyebrow band__eyebrow">In your city</p>
-    <h2 id="band-h" class="display--md band__h">Try Something,<br>Close To Home</h2>
-    <p class="lede band__lede">Trial days, practices, and drop-ins happening this week within a short trip of where you already are.</p>
-  </div>
-</section>
-
 <!-- ===================== How it works ===================== -->
 <section class="steps" id="how" aria-labelledby="how-h">
   <div data-reveal>
@@ -508,7 +489,7 @@ try {
        so it sits small. Parked it owns its block outright, and at 1.95 it drew
        barely half the canvas height with the rest as dead cream above and
        below the hero. 1.25 lets it fill the space it was already given. */
-    const f = parked() ? 1.25 : (narrowQ.matches ? 1.95 : 1.36);
+    const f = parked() ? 1.32 : (narrowQ.matches ? 1.95 : 1.36);
     if (r.width && r.height) phone.resize(r.width, r.height, f);
   }
   fit();
@@ -538,7 +519,8 @@ try {
      so the device parks in the same static pose the CSS fallback uses; asking
      main.js to snap would run the scroll arc and undo it. */
   function settle() {
-    if (parked()) phone.setPose(-4, -16, 0, 0, 0, 1);
+    if (parked() && window.__firstdayParked) window.__firstdayParked();
+    else if (parked()) phone.setPose(-4, -16, 0, 0, 0, 1);
     else if (window.__firstdaySnap) window.__firstdaySnap();
     phone.draw();
   }

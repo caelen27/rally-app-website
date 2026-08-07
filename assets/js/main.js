@@ -423,16 +423,70 @@
   // the WebGL bootstrap calls this once it is ready, to take the first pose
   window.__firstdaySnap = snap;
 
-  if (phone && track && !parked()) {
-    snap();
-    addEventListener("scroll", measure, { passive: true });
-    addEventListener("resize", snap);
+  /* ---- parked scrub ----
+     Parked, the device is a block in normal flow, so there is no pinned
+     travel for progress() to sample and the arc above never runs. Left at
+     that it is a still render on a page where everything else moves, which
+     is what made it read as a screenshot dropped into the column. This turns
+     it through a short arc as its own block crosses the viewport: the same
+     object, driven by scroll, without pinning anything.
+
+     Reduced motion is the other half of parked() and keeps the fixed pose —
+     the point there is that nothing moves. */
+  function parkedScrub() {
+    var gl = window.__phone3d;
+    if (!gl || !veilTarget) return;
+    if (reduce.matches) {
+      gl.setPose(-4, -16, 0, 0, 0, 1);
+      gl.setBlend(0);
+      gl.draw();
+      return;
+    }
+    var r = veilTarget.getBoundingClientRect();
+    // 0 as the block's top reaches the bottom of the viewport, 1 once its
+    // bottom has left the top, so the whole turn happens on screen
+    var t = clamp((window.innerHeight - r.top) / (window.innerHeight + r.height), 0, 1);
+    var e = t * 2 - 1;
+    // held off dead-on the whole way: the screen stays readable while the
+    // body turns, which is the pose the hero uses on desktop
+    gl.setPose(-9 + e * 5, -34 + t * 30, -5 + e * 2, 11, e * -4, 1);
+    gl.setBlend(0);
+    gl.draw();
+  }
+  // the WebGL bootstrap calls this to take the first parked pose
+  window.__firstdayParked = parkedScrub;
+
+  /* Which of the two drives the device is decided per event, not once at
+     load. parked() is a media query, so it flips when a phone is rotated or
+     a window is dragged across 720 — binding the branch at startup left the
+     pinned scrub running against a device that was no longer pinned, or the
+     parked scrub against one that was. */
+  var scrubRunning = false;
+  function scrubFrame() { scrubRunning = false; parkedScrub(); }
+
+  function onScroll() {
+    if (!parked()) { measure(); return; }
+    if (scrubRunning) return;
+    scrubRunning = true;
+    requestAnimationFrame(scrubFrame);
+  }
+
+  function resettle() {
+    if (parked()) parkedScrub();
+    else snap();
+  }
+
+  if (phone && track) {
+    resettle();
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", resettle);
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) snap();
+      if (!document.hidden) resettle();
     });
+    parkQ.addEventListener("change", resettle);
     narrowQ.addEventListener("change", function (e) {
       arc = e.matches ? ARC_NARROW : ARC;
-      snap();
+      resettle();
     });
   }
 
@@ -519,29 +573,6 @@
     addEventListener("scroll", drift, { passive: true });
     addEventListener("resize", drift);
     drift();
-  }
-
-  /* Same parallax on the full-bleed band image: it drifts against the scroll
-     the whole time the band is on screen. rAF-coalesced, one rect per frame. */
-  var band = document.querySelector(".band__img");
-  if (band && !reduce.matches) {
-    var bandRunning = false;
-    var bandFrame = function () {
-      var r = band.getBoundingClientRect();
-      if (r.bottom > -200 && r.top < innerHeight + 200) {
-        var mid = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
-        band.style.setProperty("--band-drift", (mid * -7).toFixed(2) + "%");
-      }
-      bandRunning = false;
-    };
-    var bandDrift = function () {
-      if (bandRunning) return;
-      bandRunning = true;
-      requestAnimationFrame(bandFrame);
-    };
-    addEventListener("scroll", bandDrift, { passive: true });
-    addEventListener("resize", bandDrift);
-    bandDrift();
   }
 
   /* =========================================================================
