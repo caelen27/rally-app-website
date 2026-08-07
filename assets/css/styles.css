@@ -1212,19 +1212,240 @@ section { position: relative; }
   white-space: nowrap;
 }
 
-/* phone frame used as a static prop in the matcher */
+/* phone frame used as a static prop in the matcher.
+
+   Everything inside is sized against --u rather than --px, so narrowing the
+   frame narrows its contents with it. The old fixed-unit mock could not be
+   shrunk — re-counting the frame alone pushed the copy straight through the
+   bottom — which is why the phone-width rule below scales the unit instead
+   of the box. */
 .prop {
+  --u: var(--px);
   position: relative;
-  width: calc(360 * var(--px));
-  height: calc(730 * var(--px));
+  width: calc(360 * var(--u));
+  height: calc(730 * var(--u));
   margin-inline: auto;
-  border-radius: calc(52 * var(--px));
-  padding: calc(9 * var(--px));
+  border-radius: calc(52 * var(--u));
+  padding: calc(9 * var(--u));
   background: linear-gradient(155deg, #3a3f45, #17191d 45%, #101215);
-  box-shadow: 0 calc(40 * var(--px)) calc(80 * var(--px)) rgba(28, 25, 23, 0.22),
+  box-shadow: 0 calc(40 * var(--u)) calc(80 * var(--u)) rgba(28, 25, 23, 0.22),
               inset 0 0 0 1px rgba(255, 255, 255, 0.13);
 }
-.prop .screen { border-radius: calc(44 * var(--px)); }
+.prop .screen { border-radius: calc(44 * var(--u)); }
+.prop .island {
+  top: calc(13 * var(--u));
+  width: calc(98 * var(--u));
+  height: calc(30 * var(--u));
+}
+
+/* ---------- the app's Discover chrome ----------
+   Reproduced from the same :root tokens assets/js/screen.js paints the 3D
+   device's texture from, so the two devices on the page are running the same
+   build of the app rather than two different guesses at it. */
+.screen--app {
+  background: #f2f2f4;
+  color: #0c0c0e;
+}
+.app { position: absolute; inset: 0; }
+
+.app__status {
+  position: absolute;
+  top: calc(19 * var(--u));
+  left: calc(26 * var(--u));
+  right: calc(24 * var(--u));
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: calc(14 * var(--u));
+  font-weight: 600;
+}
+.app__status-icons { display: flex; align-items: center; gap: calc(5 * var(--u)); }
+.app__status-icons svg { height: calc(12 * var(--u)); width: auto; }
+
+.app__head {
+  position: absolute;
+  top: calc(62 * var(--u));
+  left: calc(20 * var(--u));
+  right: calc(20 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12 * var(--u));
+}
+.app__hello {
+  font-size: calc(25 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.1;
+}
+.app__sub {
+  font-size: calc(12.5 * var(--u));
+  color: #5f5f68;
+  margin-top: calc(3 * var(--u));
+}
+.app__avatar {
+  flex: none;
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  border-radius: 50%;
+  background: #17171b;
+  color: #fafafa;
+  display: grid;
+  place-items: center;
+}
+.app__avatar svg { width: calc(21 * var(--u)); height: calc(21 * var(--u)); }
+
+/* Translucent white over a light canvas resolves to a near-white fill, so the
+   glass is carried by the bright hairline rather than the tint. */
+.app__search {
+  position: absolute;
+  top: calc(146 * var(--u));
+  left: calc(20 * var(--u));
+  right: calc(20 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--u));
+}
+.app__field {
+  flex: 1;
+  height: calc(48 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.76),
+              0 calc(1 * var(--u)) calc(2 * var(--u)) rgba(12, 12, 14, 0.04);
+  display: flex;
+  align-items: center;
+  gap: calc(9 * var(--u));
+  padding-inline: calc(16 * var(--u));
+  font-size: calc(14.5 * var(--u));
+  color: #5f5f68;
+}
+.app__field svg { width: calc(17 * var(--u)); height: calc(17 * var(--u)); flex: none; }
+.app__filter {
+  flex: none;
+  width: calc(48 * var(--u));
+  height: calc(48 * var(--u));
+  border-radius: 50%;
+  background: #18181b;
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.app__filter svg { width: calc(20 * var(--u)); height: calc(20 * var(--u)); }
+
+.app__lead {
+  position: absolute;
+  top: calc(208 * var(--u));
+  left: calc(20 * var(--u));
+  font-size: calc(19 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.app__chips {
+  position: absolute;
+  top: calc(242 * var(--u));
+  left: calc(20 * var(--u));
+  right: calc(20 * var(--u));
+  display: flex;
+  gap: calc(7 * var(--u));
+}
+.app__chip {
+  height: calc(38 * var(--u));
+  border-radius: calc(999 * var(--u));
+  padding-inline: calc(15 * var(--u));
+  display: grid;
+  place-items: center;
+  font-size: calc(12.5 * var(--u));
+  font-weight: 600;
+  color: #4a4a52;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.76);
+  white-space: nowrap;
+}
+.app__chip.is-on {
+  background: #18181b;
+  color: #fff;
+  box-shadow: none;
+}
+
+.app__cards {
+  position: absolute;
+  top: calc(292 * var(--u));
+  left: calc(20 * var(--u));
+  right: calc(20 * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(10 * var(--u));
+}
+.app__card {
+  background: #fff;
+  border-radius: calc(24 * var(--u));
+  padding: calc(15 * var(--u)) calc(17 * var(--u));
+  box-shadow: 0 calc(1 * var(--u)) calc(3 * var(--u)) rgba(12, 12, 14, 0.05);
+}
+/* flex, not inline-block: as an inline box the badge sat on a line box whose
+   leading added 24 units of dead height to every card, which was enough over
+   three cards to push the list into the dock. */
+.app__pct {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  line-height: 1;
+  font-size: calc(11 * var(--u));
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #18181b;
+  border-radius: calc(999 * var(--u));
+  padding: calc(4 * var(--u)) calc(9 * var(--u));
+}
+/* These are paragraphs, so they carry the sheet's prose bottom margin. Inside
+   a card that is 28 units of dead height each, and over three cards it was
+   enough to run the list under the dock. */
+.app__title {
+  font-size: calc(16 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  color: #101014;
+  margin: calc(9 * var(--u)) 0 0;
+}
+.app__meta {
+  font-size: calc(12 * var(--u));
+  line-height: 1.35;
+  color: #5f5f68;
+  margin: calc(5 * var(--u)) 0 0;
+}
+.app__hello, .app__sub, .app__lead { margin: 0; }
+.app__sub { margin-top: calc(3 * var(--u)); }
+
+/* The app's floating dock: dark glass, clear of the bottom edge. */
+.app__dock {
+  position: absolute;
+  left: calc(20 * var(--u));
+  right: calc(20 * var(--u));
+  bottom: calc(16 * var(--u));
+  height: calc(58 * var(--u));
+  border-radius: calc(999 * var(--u));
+  background: rgba(20, 20, 24, 0.92);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-inline: calc(10 * var(--u));
+}
+.app__dock-btn {
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: rgba(250, 250, 250, 0.55);
+}
+.app__dock-btn svg { width: calc(19 * var(--u)); height: calc(19 * var(--u)); }
+.app__dock-btn.is-on { background: #fafafa; color: #17171b; }
 
 /* =========================================================================
    Feature cards
@@ -1533,12 +1754,13 @@ details p {
   .odo { font-size: calc(150 * var(--px)); }
   .odo__reel, .odo__strip span { height: calc(140 * var(--px)); }
 
-  /* These two frame their own mock UI, whose type is sized in the same unit.
-     Re-counting the frame without re-counting what is inside it shrinks the
-     box away from its contents, which is what pushed the matcher prop's copy
-     straight through the bottom of the phone. Both keep their counts. */
+  /* The cause card frames its own mock UI, whose type is sized in the same
+     unit. Re-counting the frame without re-counting what is inside it shrinks
+     the box away from its contents, so it keeps its count. The prop scales
+     its whole composition through --u instead: 0.806 reproduces the 290x590
+     box this rule used to set, contents included. */
   .cause { width: calc(220 * var(--px)); height: calc(300 * var(--px)); }
-  .prop { width: calc(290 * var(--px)); height: calc(590 * var(--px)); }
+  .prop { --u: calc(var(--px) * 0.806); }
   /* Three columns needs a label column wide enough for "Tutoring and
      mentoring", which at a readable body size is most of a phone's width.
      The label takes its own row instead, and the meter and its number share

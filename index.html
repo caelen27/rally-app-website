@@ -265,27 +265,78 @@
     </div>
 
     <div data-reveal>
+      <!-- The app's own Discover chrome, holding the matcher's ranked list.
+           Same tokens the 3D device's texture is painted from (see the :root
+           block at the top of assets/js/screen.js): light canvas, glass
+           search, solid-dark active chip, paper cards, floating dark dock. -->
       <div class="prop" aria-hidden="true">
-        <div class="screen">
-          <div class="notch"></div>
-          <div class="scr scr--home" style="opacity:1">
-            <div class="scr__status"><span>9:41</span><span>GTA</span></div>
-            <p class="scr__hello">Your matches<br><span>Updated this morning</span></p>
-            <div class="mini-card">
-              <div class="mini-card__tag">94% match</div>
-              <div class="mini-card__title">U14 soccer, trial practice</div>
-              <div class="mini-card__meta">Scarborough Soccer Club &middot; 2.8 km</div>
+        <div class="screen screen--app">
+          <div class="island"></div>
+          <div class="app">
+
+            <div class="app__status">
+              <span>9:41</span>
+              <span class="app__status-icons">
+                <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+                <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.2a10 10 0 0 1 14 0"/><path d="M3.6 7a6.4 6.4 0 0 1 8.8 0"/><circle cx="8" cy="10.2" r="1.1" fill="currentColor" stroke="none"/></svg>
+                <svg viewBox="0 0 26 12" fill="none"><rect x="0.6" y="0.6" width="21" height="10.8" rx="3" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.2"/><rect x="2.2" y="2.2" width="15" height="7.6" rx="1.8" fill="currentColor"/><path d="M23.4 4.2v3.6a2.6 2.6 0 0 0 0-3.6z" fill="currentColor" fill-opacity="0.45"/></svg>
+              </span>
             </div>
-            <div class="mini-card">
-              <div class="mini-card__tag">91% match</div>
-              <div class="mini-card__title">Homework club, drop-in</div>
-              <div class="mini-card__meta">Agincourt Community Services &middot; 3.4 km</div>
+
+            <div class="app__head">
+              <div>
+                <p class="app__hello">Your matches</p>
+                <p class="app__sub">Updated this morning</p>
+              </div>
+              <span class="app__avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="9" r="3.4"/><path d="M5.6 19.4a6.8 6.8 0 0 1 12.8 0"/></svg>
+              </span>
             </div>
-            <div class="mini-card">
-              <div class="mini-card__tag">87% match</div>
-              <div class="mini-card__title">Life drawing, drop-in</div>
-              <div class="mini-card__meta">Studio Six Arts &middot; 1.2 km</div>
+
+            <div class="app__search">
+              <span class="app__field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16.2 16.2 20 20"/></svg>
+                Search
+              </span>
+              <span class="app__filter">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 7h18M3 12h18M3 17h18"/><circle cx="9" cy="7" r="2.2" fill="currentColor"/><circle cx="15" cy="12" r="2.2" fill="currentColor"/><circle cx="7" cy="17" r="2.2" fill="currentColor"/></svg>
+              </span>
             </div>
+
+            <p class="app__lead">Ranked for you</p>
+
+            <div class="app__chips">
+              <span class="app__chip is-on">All</span>
+              <span class="app__chip">Sports</span>
+              <span class="app__chip">Art &amp; making</span>
+            </div>
+
+            <div class="app__cards">
+              <div class="app__card">
+                <span class="app__pct">94% match</span>
+                <p class="app__title">U14 soccer, trial practice</p>
+                <p class="app__meta">Scarborough Soccer Club &middot; 2.8 km</p>
+              </div>
+              <div class="app__card">
+                <span class="app__pct">91% match</span>
+                <p class="app__title">Homework club, drop-in</p>
+                <p class="app__meta">Agincourt Community Services &middot; 3.4 km</p>
+              </div>
+              <div class="app__card">
+                <span class="app__pct">87% match</span>
+                <p class="app__title">Life drawing, drop-in</p>
+                <p class="app__meta">Studio Six Arts &middot; 1.2 km</p>
+              </div>
+            </div>
+
+            <div class="app__dock">
+              <span class="app__dock-btn is-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.4 12 4l8 6.4V20h-5.4v-5.2H9.4V20H4z"/></svg></span>
+              <span class="app__dock-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5.5" width="16" height="15" rx="3.4"/><path d="M8 3.4v3.6M16 3.4v3.6M4 10.4h16"/></svg></span>
+              <span class="app__dock-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="9.4" r="3.1"/><path d="M3.4 19.4a5.9 5.9 0 0 1 11.2 0M16.4 6.6a3 3 0 0 1 0 5.8M18 19.4a5.6 5.6 0 0 0-2.2-4"/></svg></span>
+              <span class="app__dock-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.6c6.3-3.9 8-6.6 8-9.4a4.2 4.2 0 0 0-8-1.8 4.2 4.2 0 0 0-8 1.8c0 2.8 1.7 5.5 8 9.4z"/></svg></span>
+              <span class="app__dock-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="9" r="3.4"/><path d="M5.6 19.4a6.8 6.8 0 0 1 12.8 0"/></svg></span>
+            </div>
+
           </div>
         </div>
       </div>
