@@ -719,76 +719,22 @@ section { position: relative; }
   transition: opacity 0.5s var(--ease);
 }
 
-/* --- portrait home screen --- */
-.scr--home {
-  padding: calc(62 * var(--px)) calc(22 * var(--px)) calc(22 * var(--px));
-  display: flex;
-  flex-direction: column;
-  gap: calc(14 * var(--px));
-  background:
-    radial-gradient(120% 80% at 20% 0%, rgba(31, 107, 60, 0.5), transparent 60%),
-    #0a0a0b;
-}
-/* Pinned level with the Dynamic Island rather than sitting under it, which
-   is where iOS actually puts it. */
-.scr__status {
-  position: absolute;
-  top: calc(19 * var(--px));
-  left: calc(30 * var(--px));
-  right: calc(28 * var(--px));
-  z-index: 7;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: calc(14 * var(--px));
-  font-weight: 500;
-  color: #e9e9ef;
-}
-.scr__status svg {
-  height: calc(13 * var(--px));
-  width: auto;
-  opacity: 0.95;
-}
-.scr__icons { display: flex; align-items: center; gap: calc(5 * var(--px)); }
-.scr__hello {
-  font-size: calc(26 * var(--px));
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-.scr__hello span { color: rgba(233, 233, 239, 0.5); }
-.mini-card {
-  border-radius: calc(20 * var(--px));
-  padding: calc(16 * var(--px));
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-}
-.mini-card__tag {
-  font-size: calc(11 * var(--px));
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #8fd7a8;
-  margin-bottom: calc(8 * var(--px));
-}
-.mini-card__title { font-size: calc(17 * var(--px)); line-height: 1.2; }
-.mini-card__meta {
-  font-size: calc(12.5 * var(--px));
-  color: rgba(233, 233, 239, 0.55);
-  margin-top: calc(6 * var(--px));
-}
-.mini-bar {
-  margin-top: calc(12 * var(--px));
-  height: calc(6 * var(--px));
-  border-radius: calc(999 * var(--px));
-  background: rgba(255, 255, 255, 0.12);
-  overflow: hidden;
-}
-.mini-bar i {
-  display: block;
-  height: 100%;
-  width: 62%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #4ea86e, #8fd7a8);
-}
+/* --- portrait home screen ---
+   This used to be its own dark mock ("This week, Amara" over green
+   mini-cards), authored before the app existed to reproduce. It was still
+   what painted for the instant between first paint and phone3d.js adding
+   is-gl — and permanently, for anyone without WebGL — so on every load it
+   flashed the old design before the 3D device swapped in the real one.
+   Now it just runs the same .app markup the matcher's static prop uses (see
+   the comment above .screen--app): one component, two placements, so the
+   CSS build shows the current app instead of a placeholder that goes stale
+   the next time the app's design moves.
+   --u is derived from the frame's own width rather than pinned to a value
+   per breakpoint, so it tracks --pw automatically everywhere --pw is
+   redefined. 342 is .app's logical design width — the prop's 360-unit frame
+   less its 9-unit padding on each side — so this scales the whole
+   composition to fill whatever this screen actually measures. */
+.scr--home { --u: calc(var(--pw) / 342); }
 
 /* --- landscape shift screen (rotated inside the portrait glass) ---
    Absolute centring rather than grid: the child is deliberately wider than

@@ -744,18 +744,34 @@
   }
 
   /* =========================================================================
-     7. Hide the pill over the closing CTA
+     7. Hide the pill over sections it would sit on top of
+
+     Fixed at the bottom centre, the pill outlives any one section, so it
+     covers whatever scrolls underneath it. The closing CTA was the original
+     case; the orgs price card turned out to have the same problem — its
+     first list line and the "List your organization" button both pass
+     directly under it. Rather than special-case each one, this watches a
+     set of sections and hides the pill while any of them is in view.
      ========================================================================= */
 
   var pill = document.getElementById("pill");
-  var finale = document.getElementById("get");
-  if (pill && finale && "IntersectionObserver" in window) {
-    new IntersectionObserver(function (entries) {
-      var hit = entries[0].isIntersecting;
+  var pillClearIds = ["get", "orgs"];
+  var pillClearOn = pillClearIds
+    .map(function (id) { return document.getElementById(id); })
+    .filter(Boolean);
+  if (pill && pillClearOn.length && "IntersectionObserver" in window) {
+    var hitBy = [];
+    var pillObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var i = pillClearOn.indexOf(entry.target);
+        hitBy[i] = entry.isIntersecting;
+      });
+      var hit = hitBy.indexOf(true) !== -1;
       pill.style.opacity = hit ? "0" : "1";
       pill.style.transform = "translateX(-50%) translateY(" + (hit ? "140%" : "0") + ")";
       pill.style.pointerEvents = hit ? "none" : "";
-    }, { threshold: 0.25 }).observe(finale);
+    }, { threshold: 0.25 });
+    pillClearOn.forEach(function (el) { pillObs.observe(el); });
   }
 
 })();
